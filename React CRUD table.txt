@@ -1,0 +1,93 @@
+import React, { useState } from "react";
+
+const TableWithForm = () => {
+  const [data, setData] = useState([]);
+  const [formData, setFormData] = useState({
+    name: "",
+    age: ""
+  });
+  const [edit, setEdit] = useState(false);
+  const [selectedItem, setSelectedItem] = useState({});
+
+  const handleChange = (event) => {
+    setFormData({
+      ...formData,
+      [event.target.name]: event.target.value
+    });
+  };
+
+  const handleSubmit = (event) => {
+    event.preventDefault();
+    let newData = data;
+    let newFormData = { name: "", age: "" };
+    if (!edit) {
+      newData = [...data, { id: data.length + 1, ...formData }];
+    } else {
+      newData = data.map((item) =>
+        item.id === selectedItem.id ? { ...formData } : item
+      );
+    }
+    setData(newData);
+    setFormData(newFormData);
+    setEdit(false);
+  };
+
+  const handleEdit = (item) => {
+    setFormData(item);
+    setSelectedItem(item);
+    setEdit(true);
+  };
+
+  const handleDelete = (id) => {
+    setData(data.filter((item) => item.id !== id));
+  };
+
+  return (
+    <div>
+      <form onSubmit={handleSubmit}>
+        <input
+          type="text"
+          placeholder="Name"
+          name="name"
+          value={formData.name}
+          onChange={handleChange}
+        />
+        <input
+          type="text"
+          placeholder="Age"
+          name="age"
+          value={formData.age}
+          onChange={handleChange}
+        />
+        <button type="submit">
+          {edit ? "Update" : "Add"}
+        </button>
+      </form>
+      <table>
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Name</th>
+            <th>Age</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {data.map((item) => (
+            <tr key={item.id}>
+              <td>{item.id}</td>
+              <td>{item.name}</td>
+              <td>{item.age}</td>
+              <td>
+                <button onClick={() => handleEdit(item)}>Edit</button>
+                <button onClick={() => handleDelete(item.id)}>Delete</button>
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  );
+};
+
+export default TableWithForm;
