@@ -25,10 +25,12 @@ const App = () => {
 
   const handleScroll = (e) => {
     const { scrollTop, clientHeight, scrollHeight } = e.target;
-    if (scrollTop + clientHeight >= scrollHeight - 10) {
-      setDisplayData((prevData) => prevData.concat(data.slice(startIndex, startIndex + 5)));
-      setStartIndex((prevIndex) => prevIndex + 5);
-    }
+    if (startIndex !== 15) {
+            if (scrollTop + clientHeight >= scrollHeight - 10) {
+                setDisplayData((prevData) => prevData.concat(data.slice(startIndex, startIndex + 5)));
+                setStartIndex((prevIndex) => prevIndex + 5);
+            }
+        }
   };
 
   return (
