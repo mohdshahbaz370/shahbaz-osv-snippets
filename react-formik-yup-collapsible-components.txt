@@ -4,7 +4,7 @@ import * as Yup from 'yup';
 
 function App() {
   const [formData, setFormData] = useState([{ name: "shahbaz" }])
-function Component1({ setFormData, formData}) {
+function Component1() {
   const [collapse, setCollapse] = useState(false)
   const formik = useFormik({
     initialValues: {
@@ -129,7 +129,7 @@ function Component1({ setFormData, formData}) {
 
 }
 
-function Component2({ setFormData, formData}) {
+function Component2() {
     const [collapse, setCollapse] = useState(false)
     const formik = useFormik({
         initialValues: {
@@ -248,7 +248,7 @@ function Component2({ setFormData, formData}) {
 
 }
 
-function Component3({ setFormData, formData }) {
+function Component3() {
     const [collapse, setCollapse] = useState(false)
     const formik = useFormik({
         initialValues: {
@@ -367,7 +367,7 @@ function Component3({ setFormData, formData }) {
 
 }
 
-function Component4({ setFormData, formData }) {
+function Component4() {
     console.log(formData)
     const [collapse, setCollapse] = useState(false)
     const formik = useFormik({
@@ -455,10 +455,10 @@ function Component4({ setFormData, formData }) {
 
   return (
     <>
-      <Component1 setFormData={setFormData} formData={formData} /><br />
-      <Component2 setFormData={setFormData} formData={formData} /><br />
-      <Component3 setFormData={setFormData} formData={formData} /><br />
-      <Component4 setFormData={setFormData} formData={formData} /><br />
+      <Component1 /><br />
+      <Component2 /><br />
+      <Component3 /><br />
+      <Component4 /><br />
     </>
   );
 }
