@@ -432,8 +432,8 @@ function Component4() {
                     <option value="" disabled>Applicable rules</option>
                     <option value="Saudi Arabia">Saudi Arabia</option>
                     <option value="India">India</option>
-                </select>{formik.touched.country && formik.errors.country ? (
-                    <div>{formik.errors.country}</div>
+                </select>{formik.touched.applicableRules && formik.errors.applicableRules ? (
+                    <div>{formik.errors.applicableRules}</div>
                 ) : null}<br />
                 <input type="text" value={formik.values.chargesAndFees} placeholder="Charges and fees (Optional)" id="chargesAndFees" name="chargesAndFees" onBlur={formik.handleBlur} onChange={formik.handleChange} />{formik.touched.chargesAndFees && formik.errors.chargesAndFees ? (
                     <div>{formik.errors.chargesAndFees}</div>) : null}<br />
