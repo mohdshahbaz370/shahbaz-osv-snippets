@@ -1,0 +1,466 @@
+import { useState } from "react";
+import { useFormik } from 'formik';
+import * as Yup from 'yup';
+
+function App() {
+  const [formData, setFormData] = useState([{ name: "shahbaz" }])
+function Component1({ setFormData, formData}) {
+  const [collapse, setCollapse] = useState(false)
+  const formik = useFormik({
+    initialValues: {
+      bank: "SBI",
+      kindOfGuarantee: "SBI",
+      typeOfGuarantee: "",
+      formOfGuarantee: "",
+      nameOfGuarantee: "",
+      language: "",
+      guaranteeAmountType: "",
+      currency: "SAR",
+      currencyAmount: "",
+      validityType: "",
+      expiryDate: "",
+    },
+    validationSchema: Yup.object({
+      bank: Yup.string().required('Required'),
+      kindOfGuarantee: Yup.string().required('Required'),
+      typeOfGuarantee: Yup.string().required('Required'),
+      formOfGuarantee: Yup.string().required('Required'),
+      nameOfGuarantee: Yup.string().required('Required'),
+      language: Yup.string().max(10, 'Must be 10 characters or less').required('Required').min(2, 'Must be 2 characters or more').max(15, 'Must be 15 characters or less'),
+      guaranteeAmountType: Yup.string().required('Required'),
+      currency: Yup.string().required('Required'),
+      currencyAmount: Yup.string().max(15, 'Must be 15 characters or less').required('Required').min(2, 'Must be 2 characters or more').matches(/^[0-9]+$/, 'Must be in numbers'),
+      validityType: Yup.string().required('Required'),
+      expiryDate: Yup.string().required('Required')
+    }),
+    onSubmit: (values) => {
+      alert(JSON.stringify(values, null, 2));
+      setFormData([...formData, values]);
+      console.log(formData)
+      formik.resetForm();
+    },
+  });
+
+  return (
+    <>
+      <button onClick={() => setCollapse(!collapse)}>Bank & Letter of Guarantee details</button>
+      {collapse && <form onSubmit={formik.handleSubmit}>
+        <span htmlFor="bank">Bank name</span>
+        <select value={formik.values.bank} id="bank" name="bank" onBlur={formik.handleBlur} onChange={formik.handleChange}>
+          <option value="">SBI</option>
+          <option value="ICICI">ICICI</option>
+          <option value="YESBANK">YESBANK</option>
+        </select>{formik.touched.bank && formik.errors.bank ? (
+          <div>{formik.errors.bank}</div>
+        ) : null}<br />
+        <span htmlFor="kindOfGuarantee">Kind of Guarantee</span>
+        <select value={formik.values.kindOfGuarantee} id="kindOfGuarantee" name="kindOfGuarantee" onBlur={formik.handleBlur} onChange={formik.handleChange}>
+          <option value="SBI">SBI</option>
+          <option value="ICICI">ICICI</option>
+          <option value="YESBANK">YESBANK</option>
+        </select>{formik.touched.kindOfGuarantee && formik.errors.kindOfGuarantee ? (
+          <div>{formik.errors.kindOfGuarantee}</div>
+        ) : null}<br />
+        <select value={formik.values.typeOfGuarantee} id="typeOfGuarantee" name="typeOfGuarantee" onBlur={formik.handleBlur} onChange={formik.handleChange}>
+          <option value="" disabled>Type of Guarantee</option>
+          <option value="ICICI">ICICI</option>
+          <option value="YESBANK">YESBANK</option>
+        </select>{formik.touched.typeOfGuarantee && formik.errors.typeOfGuarantee ? (
+          <div>{formik.errors.typeOfGuarantee}</div>
+        ) : null}
+        <select value={formik.values.formOfGuarantee} id="formOfGuarantee" name="formOfGuarantee" onBlur={formik.handleBlur} onChange={formik.handleChange}>
+          <option value="" disabled>Form of Guarantee</option>
+          <option value="ICICI">ICICI</option>
+          <option value="YESBANK">YESBANK</option>
+        </select>{formik.touched.formOfGuarantee && formik.errors.formOfGuarantee ? (
+          <div>{formik.errors.formOfGuarantee}</div>
+        ) : null}<br />
+        <select value={formik.values.nameOfGuarantee} id="nameOfGuarantee" name="nameOfGuarantee" onBlur={formik.handleBlur} onChange={formik.handleChange}>
+          <option value="" disabled>Name of Guarantee</option>
+          <option value="ICICI">ICICI</option>
+          <option value="YESBANK">YESBANK</option>
+        </select>{formik.touched.nameOfGuarantee && formik.errors.nameOfGuarantee ? (
+          <div>{formik.errors.nameOfGuarantee}</div>
+        ) : null}
+        <select value={formik.values.language} id="language" name="language" onBlur={formik.handleBlur} onChange={formik.handleChange}>
+          <option value="" disabled>Language</option>
+          <option value="Arabic">Arabic</option>
+          <option value="Urdu">English</option>
+        </select>{formik.touched.language && formik.errors.language ? (
+          <div>{formik.errors.language}</div>
+        ) : null}<br />
+        <span htmlFor="guaranteeAmountType">Guarantee Amount Type</span>
+        <select value={formik.values.guaranteeAmountType} id="guaranteeAmountType" name="guaranteeAmountType" onBlur={formik.handleBlur} onChange={formik.handleChange}>
+          <option value="" disabled>Type</option>
+          <option value="ICICI">ICICI</option>
+          <option value="YESBANK">YESBANK</option>
+        </select>{formik.touched.guaranteeAmountType && formik.errors.guaranteeAmountType ? (
+          <div>{formik.errors.guaranteeAmountType}</div>
+        ) : null}<br />
+        <span htmlFor="currency">Currency Amount</span>
+        <select value={formik.values.currency} id="currency" name="currency" onBlur={formik.handleBlur} onChange={formik.handleChange}>
+          <option value="SAR">SAR</option>
+          <option value="INR">INR</option>
+          <option value="USD">USD</option>
+        </select>{formik.touched.currency && formik.errors.currency ? (
+          <div>{formik.errors.currency}</div>
+        ) : null}       
+        <input type="text" value={formik.values.currencyAmount} id="currencyAmount" name="currencyAmount" onBlur={formik.handleBlur} onChange={formik.handleChange} />{formik.touched.currencyAmount && formik.errors.currencyAmount ? (
+          <div>{formik.errors.currencyAmount}</div>
+        ) : null}<br />
+        <span htmlFor="validityType">Validity Type</span>
+        <select value={formik.values.validityType} id="validityType" name="validityType" onBlur={formik.handleBlur} onChange={formik.handleChange}>
+          <option value="" disabled>Validity Type</option>
+          <option value="ICICI">ICICI</option>
+          <option value="YESBANK">YESBANK</option>
+        </select>{formik.touched.validityType && formik.errors.validityType ? (
+          <div>{formik.errors.validityType}</div>
+        ) : null}
+        <span htmlFor="expiryDate">Expiry Date</span>
+        <input type="date" value={formik.values.expiryDate} id="expiryDate" name="expiryDate" onBlur={formik.handleBlur} onChange={formik.handleChange} />{formik.touched.expiryDate && formik.errors.expiryDate ? (
+          <div>{formik.errors.expiryDate}</div>
+        ) : null}<br />
+        <button type="reset" onClick={ e => formik.resetForm()}>Clear</button>
+        <button type="submit">Next</button>
+      </form>
+      }
+    </>
+  )
+
+}
+
+function Component2({ setFormData, formData}) {
+    const [collapse, setCollapse] = useState(false)
+    const formik = useFormik({
+        initialValues: {
+            name: "",
+            CRNumber: "",
+            deliveryOfOriginalGuarantee: "",
+            deliveryTo: "",
+            addressType: "",
+            shortAddress: "",
+            buildingNumber: "",
+            unitNumber: "",
+            streetName: "",
+            secondaryNumber: "",
+            country: "",
+            district: "",
+            city: "",
+            postalCode: "",
+        },
+        validationSchema: Yup.object({
+            name: Yup.string().required('Required').max(10, 'Must be 10 characters or less').min(2, 'Must be 2 characters or more'),
+            CRNumber: Yup.string().required('Required').max(15, 'Must be 10 characters or less').min(15, 'Must be 2 characters or more').matches(/^[0-9]+$/, 'Must be in numbers'),
+            deliveryOfOriginalGuarantee: Yup.string().required('Required'),
+            deliveryTo: Yup.string().required('Required'),
+            addressType: Yup.string().required('Required'),
+            shortAddress: Yup.string().max(10, 'Must be 10 characters or less').required('Required').min(2, 'Must be 2 characters or more').max(15, 'Must be 15 characters or less'),
+            buildingNumber: Yup.string().required('Required').max(10, 'Must be 10 characters or less').min(2, 'Must be 2 characters or more'),
+            unitNumber: Yup.string().required('Required').max(10, 'Must be 10 characters or less').min(2, 'Must be 2 characters or more'),
+            streetName: Yup.string().max(15, 'Must be 15 characters or less').required('Required').min(2, 'Must be 2 characters or more'),
+            secondaryNumber: Yup.string().required('Required').max(10, 'Must be 10 characters or less').min(2, 'Must be 2 characters or more').matches(/^[0-9]+$/, 'Must be in numbers'),
+            country: Yup.string().required('Required'),
+            district: Yup.string().required('Required').max(10, 'Must be 10 characters or less').min(2, 'Must be 2 characters or more'),
+            city: Yup.string().required('Required').max(10, 'Must be 10 characters or less').min(2, 'Must be 2 characters or more'),
+            postalCode: Yup.string().required('Required').max(10, 'Must be 10 characters or less').min(2, 'Must be 2 characters or more').matches(/^[0-9]+$/, 'Must be in numbers')
+        }),
+        onSubmit: (values) => {
+            alert(JSON.stringify(values, null, 2));
+            setFormData([...formData, values]);
+            console.log(formData)
+            formik.resetForm();
+        },
+    });
+
+    return (
+        <>
+            <button onClick={() => setCollapse(!collapse)}>Applicant & Delivery details</button>
+            {collapse && <form onSubmit={formik.handleSubmit}>
+                <input type="text" placeholder="name" value={formik.values.name} id="name" name="name" onBlur={formik.handleBlur} onChange={formik.handleChange} />{formik.touched.name && formik.errors.name ? (
+                    <div>{formik.errors.name}</div>
+                ) : null}<br />
+              <input type="text" placeholder="CR Number" value={formik.values.CRNumber} id="CRNumber" name="CRNumber" onBlur={formik.handleBlur} onChange={formik.handleChange} />{formik.touched.CRNumber && formik.errors.CRNumber ? (
+                    <div>{formik.errors.CRNumber}</div>
+                ) : null}<br />
+                <select value={formik.values.deliveryOfOriginalGuarantee} id="deliveryOfOriginalGuarantee" name="deliveryOfOriginalGuarantee" onBlur={formik.handleBlur} onChange={formik.handleChange}>
+                    <option value="" disabled>Delivery Of Original Guarantee</option>
+                    <option value="Delivery Of Original Guarantee 2">Delivery Of Original Guarantee 2</option>
+                    <option value="Delivery Of Original Guarantee 3">Delivery Of Original Guarantee 3</option>
+                </select>{formik.touched.deliveryOfOriginalGuarantee && formik.errors.deliveryOfOriginalGuarantee ? (
+                    <div>{formik.errors.deliveryOfOriginalGuarantee}</div>
+                ) : null}<br />
+                <select value={formik.values.deliveryTo} id="deliveryTo" name="deliveryTo" onBlur={formik.handleBlur} onChange={formik.handleChange}>
+                    <option value="" disabled>Delivery To</option>
+                    <option value="Masab Tank">Masab Tank</option>
+                    <option value="Banjara Hills">Banjara Hills</option>
+                </select>{formik.touched.deliveryTo && formik.errors.deliveryTo ? (
+                    <div>{formik.errors.deliveryTo}</div>
+                ) : null}<br />
+                <select value={formik.values.addressType} id="addressType" name="addressType" onBlur={formik.handleBlur} onChange={formik.handleChange}>
+                    <option value="" disabled>Address Type</option>
+                    <option value="Business Address">Business Address</option>
+                    <option value="Billing Address">Billing Address</option>
+                </select>{formik.touched.addressType && formik.errors.addressType ? (
+                    <div>{formik.errors.addressType}</div>
+                ) : null}<br />
+                <select value={formik.values.shortAddress} id="shortAddress" name="shortAddress" onBlur={formik.handleBlur} onChange={formik.handleChange}>
+                    <option value="" disabled>Short Address</option>
+                    <option value="St.">St.</option>
+                    <option value="Rd.">Rd.</option>
+                </select>{formik.touched.shortAddress && formik.errors.shortAddress ? (
+                    <div>{formik.errors.shortAddress}</div>
+                ) : null}<br />
+               <input type="text" placeholder="Building Number" value={formik.values.buildingNumber} id="buildingNumber" name="buildingNumber" onBlur={formik.handleBlur} onChange={formik.handleChange} />{formik.touched.buildingNumber && formik.errors.buildingNumber ? (
+                    <div>{formik.errors.buildingNumber}</div>
+                ) : null}
+                <input type="text" placeholder="Unit Number" value={formik.values.unitNumber} id="unitNumber" name="unitNumber" onBlur={formik.handleBlur} onChange={formik.handleChange} />{formik.touched.unitNumber && formik.errors.unitNumber ? (
+                    <div>{formik.errors.unitNumber}</div>
+                ) : null}<br />
+                <input type="text" placeholder="Street Name" value={formik.values.streetName} id="streetName" name="streetName" onBlur={formik.handleBlur} onChange={formik.handleChange} />{formik.touched.streetName && formik.errors.streetName ? (
+                    <div>{formik.errors.streetName}</div>
+                ) : null}
+                <input type="text"  placeholder="Secondary Number" value={formik.values.secondaryNumber} id="secondaryNumber" name="secondaryNumber" onBlur={formik.handleBlur} onChange={formik.handleChange} />{formik.touched.secondaryNumber && formik.errors.secondaryNumber ? (
+                    <div>{formik.errors.secondaryNumber}</div>
+                ) : null}<br />
+                <select value={formik.values.country} id="country" name="country" onBlur={formik.handleBlur} onChange={formik.handleChange}>
+                    <option value="" disabled>Country</option>
+                    <option value="Saudi Arabia">Saudi Arabia</option>
+                    <option value="India">India</option>
+                </select>{formik.touched.country && formik.errors.country ? (
+                    <div>{formik.errors.country}</div>
+                ) : null}
+                <input type="text"  placeholder="Distict" value={formik.values.district} id="district" name="district" onBlur={formik.handleBlur} onChange={formik.handleChange} />{formik.touched.district && formik.errors.district ? (
+                    <div>{formik.errors.district}</div>
+                ) : null}<br />
+                <input type="text"  placeholder="City" value={formik.values.city} id="city" name="city" onBlur={formik.handleBlur} onChange={formik.handleChange} />{formik.touched.city && formik.errors.city ? (
+                    <div>{formik.errors.city}</div>
+                ) : null}
+                <input type="text"  placeholder="Postal Code" value={formik.values.postalCode} id="postalCode" name="postalCode" onBlur={formik.handleBlur} onChange={formik.handleChange} />{formik.touched.postalCode && formik.errors.postalCode ? (
+                    <div>{formik.errors.postalCode}</div>
+                ) : null}<br />
+                <a href="#">Applicant address is Different ?</a><br />
+                <button type="reset" onClick={ e => formik.resetForm()}>Clear</button>
+                <button type="submit">Next</button>
+            </form>
+            }
+        </>
+    )
+
+}
+
+function Component3({ setFormData, formData }) {
+    const [collapse, setCollapse] = useState(false)
+    const formik = useFormik({
+        initialValues: {
+            name: "",
+            CRNumber: "",
+            addressType: "",
+            shortAddress: "",
+            buildingNumber: "",
+            unitNumber: "",
+            streetName: "",
+            secondaryNumber: "",
+            district: "",
+            postalCode: "",
+            city: "",
+            country: "",
+            liabilityDescription: "",
+            reference: "",
+            referenceDate: ""
+
+        },
+        validationSchema: Yup.object({
+            name: Yup.string().required('Required').max(10, 'Must be 10 characters or less').min(2, 'Must be 2 characters or more'),
+            CRNumber: Yup.string().required('Required').max(10, 'Must be 10 characters or less').min(2, 'Must be 2 characters or more').matches(/^[0-9]+$/, 'Must be in numbers'),
+            addressType: Yup.string().required('Required'),
+            shortAddress: Yup.string().max(10, 'Must be 10 characters or less').required('Required').min(2, 'Must be 2 characters or more').max(15, 'Must be 15 characters or less'),
+            buildingNumber: Yup.string().required('Required').max(10, 'Must be 10 characters or less').min(2, 'Must be 2 characters or more'),
+            unitNumber: Yup.string().required('Required').max(10, 'Must be 10 characters or less').min(2, 'Must be 2 characters or more'),
+            streetName: Yup.string().max(15, 'Must be 15 characters or less').required('Required').min(2, 'Must be 2 characters or more'),
+            secondaryNumber: Yup.string().required('Required').max(10, 'Must be 10 characters or less').min(2, 'Must be 2 characters or more').matches(/^[0-9]+$/, 'Must be in numbers'),
+            country: Yup.string().required('Required'),
+            district: Yup.string().required('Required').max(10, 'Must be 10 characters or less').min(2, 'Must be 2 characters or more'),
+            city: Yup.string().required('Required').max(10, 'Must be 10 characters or less').min(2, 'Must be 2 characters or more'),
+            postalCode: Yup.string().required('Required').max(10, 'Must be 10 characters or less').min(2, 'Must be 2 characters or more').matches(/^[0-9]+$/, 'Must be in numbers'),
+            liabilityDescription: Yup.string().required('Required').max(10, 'Must be 10 characters or less').min(2, 'Must be 2 characters or more'),
+            reference: Yup.string().required('Required'),
+            referenceDate: Yup.string().required('Required')
+        }),
+        onSubmit: (values) => {
+            alert(JSON.stringify(values, null, 2));
+            setFormData([...formData, values]);
+            console.log(formData)
+            formik.resetForm();
+        },
+    });
+
+    return (
+        <>
+            <button onClick={() => setCollapse(!collapse)}>Beneficiary & Liability details</button>
+            {collapse && <form onSubmit={formik.handleSubmit}>
+                <input type="text" placeholder="name" value={formik.values.name} id="name" name="name" onBlur={formik.handleBlur} onChange={formik.handleChange} />{formik.touched.name && formik.errors.name ? (
+                    <div>{formik.errors.name}</div>
+                ) : null}<br />
+                <input type="text" placeholder="CR Number" value={formik.values.CRNumber} id="CRNumber" name="CRNumber" onBlur={formik.handleBlur} onChange={formik.handleChange} />{formik.touched.CRNumber && formik.errors.CRNumber ? (
+                    <div>{formik.errors.CRNumber}</div>
+                ) : null}<br />
+                <select value={formik.values.addressType} id="addressType" name="addressType" onBlur={formik.handleBlur} onChange={formik.handleChange}>
+                    <option value="" disabled>Address Type</option>
+                    <option value="Business Address">Business Address</option>
+                    <option value="Billing Address">Billing Address</option>
+                </select>{formik.touched.addressType && formik.errors.addressType ? (
+                    <div>{formik.errors.addressType}</div>
+                ) : null}<br />
+                <select value={formik.values.shortAddress} id="shortAddress" name="shortAddress" onBlur={formik.handleBlur} onChange={formik.handleChange}>
+                    <option value="" disabled>Short Address</option>
+                    <option value="St.">St.</option>
+                    <option value="Rd.">Rd.</option>
+                </select>{formik.touched.shortAddress && formik.errors.shortAddress ? (
+                    <div>{formik.errors.shortAddress}</div>
+                ) : null}<br />
+                <input type="text" placeholder="Building Number" value={formik.values.buildingNumber} id="buildingNumber" name="buildingNumber" onBlur={formik.handleBlur} onChange={formik.handleChange} />{formik.touched.buildingNumber && formik.errors.buildingNumber ? (
+                    <div>{formik.errors.buildingNumber}</div>
+                ) : null}
+                <input type="text" placeholder="Unit Number" value={formik.values.unitNumber} id="unitNumber" name="unitNumber" onBlur={formik.handleBlur} onChange={formik.handleChange} />{formik.touched.unitNumber && formik.errors.unitNumber ? (
+                    <div>{formik.errors.unitNumber}</div>
+                ) : null}<br />
+                <input type="text" placeholder="Street Name" value={formik.values.streetName} id="streetName" name="streetName" onBlur={formik.handleBlur} onChange={formik.handleChange} />{formik.touched.streetName && formik.errors.streetName ? (
+                    <div>{formik.errors.streetName}</div>
+                ) : null}
+                <input type="text" placeholder="Secondary Number" value={formik.values.secondaryNumber} id="secondaryNumber" name="secondaryNumber" onBlur={formik.handleBlur} onChange={formik.handleChange} />{formik.touched.secondaryNumber && formik.errors.secondaryNumber ? (
+                    <div>{formik.errors.secondaryNumber}</div>
+                ) : null}<br />
+                <select value={formik.values.country} id="country" name="country" onBlur={formik.handleBlur} onChange={formik.handleChange}>
+                    <option value="" disabled>Country</option>
+                    <option value="Saudi Arabia">Saudi Arabia</option>
+                    <option value="India">India</option>
+                </select>{formik.touched.country && formik.errors.country ? (
+                    <div>{formik.errors.country}</div>
+                ) : null}
+                <input type="text" placeholder="District" value={formik.values.district} id="district" name="district" onBlur={formik.handleBlur} onChange={formik.handleChange} />{formik.touched.district && formik.errors.district ? (
+                    <div>{formik.errors.district}</div>
+                ) : null}<br />
+                <input type="text" placeholder="City" value={formik.values.city} id="city" name="city" onBlur={formik.handleBlur} onChange={formik.handleChange} />{formik.touched.city && formik.errors.city ? (
+                    <div>{formik.errors.city}</div>
+                ) : null}
+                <input type="text" placeholder="Postal Code" value={formik.values.postalCode} id="postalCode" name="postalCode" onBlur={formik.handleBlur} onChange={formik.handleChange} />{formik.touched.postalCode && formik.errors.postalCode ? (
+                    <div>{formik.errors.postalCode}</div>
+                ) : null}<br />
+                <textarea value={formik.values.liabilityDescription} placeholder="Liability description" id="liabilityDescription" name="liabilityDescription" onBlur={formik.handleBlur} onChange={formik.handleChange} />{formik.touched.liabilityDescription && formik.errors.liabilityDescription ? (
+                    <div>{formik.errors.liabilityDescription}</div>) : null}<br />
+                    <select value={formik.values.reference} id="reference" name="reference" onBlur={formik.handleBlur} onChange={formik.handleChange}>
+                    <option value="" disabled>Reference</option>
+                    <option value="Saudi Arabia">Saudi Arabia</option>
+                    <option value="India">India</option>
+                </select>{formik.touched.reference && formik.errors.reference ? (
+                    <div>{formik.errors.reference}</div>
+                ) : null}
+                <input type="date" value={formik.values.referenceDate} id="referenceDate" name="referenceDate" onBlur={formik.handleBlur} onChange={formik.handleChange} />{formik.touched.referenceDate && formik.errors.referenceDate ? (
+          <div>{formik.errors.referenceDate}</div>
+        ) : null}<br />
+                <button type="reset" onClick={ e => formik.resetForm()}>Clear</button>
+                <button type="submit">Next</button>
+            </form>
+            }
+        </>
+    )
+
+}
+
+function Component4({ setFormData, formData }) {
+    console.log(formData)
+    const [collapse, setCollapse] = useState(false)
+    const formik = useFormik({
+        initialValues: {
+            currency: "SAR",
+            currencyAmount: "",
+            guaranteeValueInPercentage: "",
+            customerMobileNumber: "",
+            beneficiaryMobileNumber: "",
+            applicableRules: "",
+            chargesAndFees: "",
+            detailsOfGuarantee: "",
+            termsAndConditions: "",
+            letterOfGuaranteeStartDate: ""
+        },
+        validationSchema: Yup.object({
+            currency: Yup.string().required('Required'),
+            currencyAmount: Yup.string().required('Required').max(10, 'Must be 10 characters or less').min(2, 'Must be 2 characters or more').matches(/^[0-9]+$/, 'Must be in numbers'),
+            guaranteeValueInPercentage: Yup.string().required('Required').max(5, 'Must be 5 characters or less').min(1, 'Must be 1 characters or more').matches(/^[0-9]+(?:\.\d+)?%$/, 'Must be in numbers, percentage, and optional decimal format'),
+            customerMobileNumber: Yup.string().max(10, 'Must be 10 characters').required('Required').min(10, 'Must be 10 characters').matches(/^[0-9]+$/, 'Must be in numbers'),
+            beneficiaryMobileNumber: Yup.string().required('Required').max(10, 'Must be 10 characters').min(10, 'Must be 10 characters').matches(/^[0-9]+$/, 'Must be in numbers'),
+            applicableRules: Yup.string().required('Required'),
+            chargesAndFees: Yup.string().max(15, 'Must be 15 characters or less').min(2, 'Must be 2 characters or more').matches(/^[0-9]+$/, 'Must be in numbers'),
+            detailsOfGuarantee: Yup.string().required('Required').max(50, 'Must be 10 characters or less').min(10, 'Must be 10 characters or more'),
+            termsAndConditions: Yup.string().required('Required').max(50, 'Must be 10 characters or less').min(10, 'Must be 10 characters or more'),
+            letterOfGuaranteeStartDate: Yup.string().required('Required')
+        }),
+        onSubmit: (values) => {
+            alert(JSON.stringify(values, null, 2));
+            setFormData([...formData, values]);
+            console.log(formData)
+            console.log(formData)
+            formik.resetForm();
+        },
+    });
+
+    return (
+        <>
+            <button onClick={() => setCollapse(!collapse)}>Total Order Amount details</button>
+            {collapse && <form onSubmit={formik.handleSubmit}>
+                <span htmlFor="currency">Total Order Amount</span>
+                <select value={formik.values.currency} id="currency" name="currency" onBlur={formik.handleBlur} onChange={formik.handleChange}>
+                    <option value="SAR">SAR</option>
+                    <option value="INR">INR</option>
+                    <option value="USD">USD</option>
+                </select>{formik.touched.shortAddress && formik.errors.shortAddress ? (
+                    <div>{formik.errors.shortAddress}</div>
+                ) : null}
+                <input type="text" placeholder="Amount" value={formik.values.currencyAmount} id="currencyAmount" name="currencyAmount" onBlur={formik.handleBlur} onChange={formik.handleChange} />{formik.touched.currencyAmount && formik.errors.currencyAmount ? (
+                    <div>{formik.errors.currencyAmount}</div>
+                ) : null}<br />
+                <input type="text" placeholder="Guarantee Value in %" value={formik.values.guaranteeValueInPercentage} id="guaranteeValueInPercentage" name="guaranteeValueInPercentage" onBlur={formik.handleBlur} onChange={formik.handleChange} />{formik.touched.guaranteeValueInPercentage && formik.errors.guaranteeValueInPercentage ? (
+                    <div>{formik.errors.guaranteeValueInPercentage}</div>
+                ) : null}<br />
+                <input type="text" placeholder="Customer Mobile number" value={formik.values.customerMobileNumber} id="customerMobileNumber" name="customerMobileNumber" onBlur={formik.handleBlur} onChange={formik.handleChange} />{formik.touched.customerMobileNumber && formik.errors.customerMobileNumber ? (
+                    <div>{formik.errors.customerMobileNumber}</div>
+                ) : null}
+                <input type="text" placeholder="Beneficiary Mobile number" value={formik.values.beneficiaryMobileNumber} id="beneficiaryMobileNumber" name="beneficiaryMobileNumber" onBlur={formik.handleBlur} onChange={formik.handleChange} />{formik.touched.beneficiaryMobileNumber && formik.errors.beneficiaryMobileNumber ? (
+                    <div>{formik.errors.beneficiaryMobileNumber}</div>
+                ) : null}<br />
+                <select value={formik.values.applicableRules} id="applicableRules" name="applicableRules" onBlur={formik.handleBlur} onChange={formik.handleChange}>
+                    <option value="" disabled>Applicable rules</option>
+                    <option value="Saudi Arabia">Saudi Arabia</option>
+                    <option value="India">India</option>
+                </select>{formik.touched.country && formik.errors.country ? (
+                    <div>{formik.errors.country}</div>
+                ) : null}<br />
+                <input type="text" value={formik.values.chargesAndFees} placeholder="Charges and fees (Optional)" id="chargesAndFees" name="chargesAndFees" onBlur={formik.handleBlur} onChange={formik.handleChange} />{formik.touched.chargesAndFees && formik.errors.chargesAndFees ? (
+                    <div>{formik.errors.chargesAndFees}</div>) : null}<br />
+                <textarea value={formik.values.detailsOfGuarantee} placeholder="Details Of Guarantee" id="detailsOfGuarantee" name="detailsOfGuarantee" onBlur={formik.handleBlur} onChange={formik.handleChange} />{formik.touched.detailsOfGuarantee && formik.errors.detailsOfGuarantee ? (
+                    <div>{formik.errors.detailsOfGuarantee}</div>) : null}<br />
+                <textarea value={formik.values.termsAndConditions} placeholder="Terms and conditions" id="termsAndConditions" name="termsAndConditions" onBlur={formik.handleBlur} onChange={formik.handleChange} />{formik.touched.termsAndConditions && formik.errors.termsAndConditions ? (
+                    <div>{formik.errors.termsAndConditions}</div>) : null}<br />
+                <input type="date" value={formik.values.letterOfGuaranteeStartDate} id="letterOfGuaranteeStartDate" name="letterOfGuaranteeStartDate" onBlur={formik.handleBlur} onChange={formik.handleChange} />{formik.touched.letterOfGuaranteeStartDate && formik.errors.letterOfGuaranteeStartDate ? (
+                    <div>{formik.errors.letterOfGuaranteeStartDate}</div>
+                ) : null}<br />
+                <button type="reset" onClick={ e => formik.resetForm()}>Clear</button>
+                <button type="submit">Next</button>
+            </form>
+            }
+        </>
+    )
+
+}
+
+  return (
+    <>
+      <Component1 setFormData={setFormData} formData={formData} /><br />
+      <Component2 setFormData={setFormData} formData={formData} /><br />
+      <Component3 setFormData={setFormData} formData={formData} /><br />
+      <Component4 setFormData={setFormData} formData={formData} /><br />
+    </>
+  );
+}
+
+export default App;
