@@ -21,7 +21,9 @@ const TableWithForm = () => {
     let newData = data;
     let newFormData = { name: "", age: "" };
     if (!edit) {
-      newData = [...data, { id: data.length + 1, ...formData }];
+      const highestId = Math.max(...data.map((row) => row.id));
+      const id = highestId + 1;
+      newData = [...data, { id: id, ...formData }];
     } else {
       newData = data.map((item) =>
         item.id === selectedItem.id ? { ...formData } : item
