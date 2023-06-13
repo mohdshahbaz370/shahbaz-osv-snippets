@@ -1,0 +1,95 @@
+Handle Checkboxes Statically:
+
+import React, { useState } from 'react';
+
+export function App() {
+  const [checkboxes, setCheckboxes] = useState([
+    { id: 1, isChecked: false },
+    { id: 2, isChecked: false },
+    { id: 3, isChecked: false },
+  ]);
+  const [isButtonDisabled, setIsButtonDisabled] = useState(true);
+
+  const handleCheckboxChange = (event) => {
+    const updatedCheckboxes = checkboxes.map((checkbox) =>
+      checkbox.id === parseInt(event.target.id)
+        ? { ...checkbox, isChecked: event.target.checked }
+        : checkbox
+    );
+
+    setCheckboxes(updatedCheckboxes);
+
+    const isAnyCheckboxChecked = updatedCheckboxes.some(
+      (checkbox) => checkbox.isChecked
+    );
+    setIsButtonDisabled(!isAnyCheckboxChecked);
+  };
+
+  return (
+    <div>
+      {checkboxes.map((checkbox) => (
+        <div key={checkbox.id}>
+          <input
+            type="checkbox"
+            id={checkbox.id}
+            checked={checkbox.isChecked}
+            onChange={handleCheckboxChange}
+          />
+          <label htmlFor={checkbox.id}>Checkbox {checkbox.id}</label>
+        </div>
+      ))}
+      <button disabled={isButtonDisabled}>Click me</button>
+    </div>
+  );
+}
+
+Handle Checkboxes Dynamically:
+
+import React, { useState, useEffect } from 'react';
+
+function App() {
+  const [checkboxes, setCheckboxes] = useState([]);
+  const [isButtonDisabled, setIsButtonDisabled] = useState(true);
+
+  useEffect(() => {
+    fetch('https://example.com/api/checkboxes')
+      .then((response) => response.json())
+      .then((data) =>
+        setCheckboxes(
+          data.map((checkbox) => ({ ...checkbox, isChecked: false }))
+        )
+      );
+  }, []);
+
+  const handleCheckboxChange = (event) => {
+    const updatedCheckboxes = checkboxes.map((checkbox) =>
+      checkbox.id === parseInt(event.target.id)
+        ? { ...checkbox, isChecked: event.target.checked }
+        : checkbox
+    );
+
+    setCheckboxes(updatedCheckboxes);
+
+    const isAnyCheckboxChecked = updatedCheckboxes.some(
+      (checkbox) => checkbox.isChecked
+    );
+    setIsButtonDisabled(!isAnyCheckboxChecked);
+  };
+
+  return (
+    <div>
+      {checkboxes.map((checkbox) => (
+        <div key={checkbox.id}>
+          <input
+            type="checkbox"
+            id={checkbox.id}
+            checked={checkbox.isChecked}
+            onChange={handleCheckboxChange}
+          />
+          <label htmlFor={checkbox.id}>{checkbox.label}</label>
+        </div>
+      ))}
+      <button disabled={isButtonDisabled}>Click me</button>
+    </div>
+  );
+}
