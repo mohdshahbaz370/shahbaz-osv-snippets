@@ -1,0 +1,115 @@
+////////
+const checkGlobalOptions = (globalOptions: any, selectedOptions: any) => {
+    const data: any = [];
+    globalOptions?.forEach((option: any) => {
+      let check: boolean = true;
+      selectedOptions?.forEach((opt: any) => {
+        if (option?.itemCode === opt?.item) {
+          check = false;
+        }
+      });
+      if (check) {
+        data.push(option);
+      }
+    });
+    return data;
+  };
+
+/////
+ const filteredSelectedAccounts = (selectedAccounts: any, bankNames: any, accountNumbers: any, selectedBanks: any) => {
+    const selectedBanksNew = bankNames?.filter((li: any) => selectedBanks?.includes(li?._id));
+    const selectedAccountsNew = accountNumbers?.filter((li: any) => selectedAccounts?.includes(li?._id));
+    let arr: any = [];
+    selectedAccountsNew?.forEach((li: any) => {
+      const acc = selectedBanksNew.find((li2: any) => li2?.code === li?.bankCode);
+      acc && arr.push(li?._id);
+    });
+    return arr;
+  }
+
+/////
+  const filteredAccountNumbers = (selectedBanks: any, bankNames: any, accountNumbers: any) => {
+    let ids = [...selectedBanks];
+    const filteredBankNames = bankNames?.filter((item: any) => ids?.includes(item?._id));
+    if (filteredBankNames?.length === 0) {
+      return []
+    } else {
+      const filteredAccountNumbers = accountNumbers?.filter((itm1: any) => {
+        return filteredBankNames?.some((itm2: any) => {
+          return itm1?.bankCode === itm2?.code;
+        });
+      });
+      return filteredAccountNumbers?.length > 0
+        ? filteredAccountNumbers?.map((acc: any) => ({
+          ...acc,
+          label: acc?.accNum,
+          value: acc?._id,
+        }))
+        : []
+    }
+  }
+
+////////////
+    {isPeriod && duration?.map((duration: any) => {
+                if (isPeriod?.includes(duration?.month)) {
+                  return <div className="mt-2">
+                    <div className="budgetMonth mb-1 budgetActiveM">
+                      <span>{duration?.month}</span>
+                    </div>
+                    <span className="softBlueColor">{duration?.year}</span>
+                  </div>
+                } else {
+                  return <div className="mt-2">
+                    <div className="budgetMonth mb-1">
+                      <span>{duration?.month}</span>
+                    </div>
+                    <span>{duration?.year}</span>
+                  </div>
+                }
+
+///////// remove dropdown from invoice and po
+const check = new Map();
+
+check.set(0, true);
+check.set(1, false);
+check.set(0, false);
+
+const index = 0;
+const test = check.get(index) ? "option" : "no-option";
+console.log(test)
+
+const dMap = new Map();
+
+dMap.set(0, new Map());
+dMap.set(1, new Map());
+
+dMap.get(0).set(0, "option");
+dMap.get(0).set(1, "on-option");
+dMap.get(0).delete(1);
+console.log(dMap.get(0).get(1));
+
+//////// 
+const items = [
+  { id: 1, name: 'item1', isTrue: true },
+  { id: 2, name: 'item2', isTrue: false },
+  { id: 3, name: 'item3', isTrue: true },
+  { id: 4, name: 'item4', isTrue: false }
+];
+
+const ids = [1, 3];
+
+const filteredItems = items.filter(item => ids.includes(item.id) && item.isTrue);
+
+if (filteredItems.length === 0) {
+  console.log(items);
+} else {
+  console.log(filteredItems);
+}
+
+     return AccountNumbers?.length > 0
+        ? AccountNumbers?.map((acc: any) => ({
+          ...acc,
+          label: "",
+          value: "",
+        }))
+        : []
