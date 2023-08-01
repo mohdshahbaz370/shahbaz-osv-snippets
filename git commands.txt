@@ -1,0 +1,37 @@
+new repo
+
+open cmd
+git init
+git clone "git url"
+cd "osv-frontend"
+code . / npm run "uat-frontend"
+
+To commit changes:
+git add .
+git commit -m "commit comment"
+git pull
+git pull origin shiva/inventory
+git pull origin release/development
+git push
+
+Switching to other branch:
+git pull
+git pull origin .......
+git pull origin .......
+git pull origin release/development
+git push
+
+Not to commit changes when changes are there:
+git stash
+git pull
+git pull origin ....
+git pull origin ....
+git pull origin release/development
+git push
+git stash apply
+
+Switching to a new branch:
+First switch to the parent branch from where we need to pull changes 
+git checkout "branch name"
+Then create a child branch and this will inherit history and data of parent branch
+git checkout -b "branch name"

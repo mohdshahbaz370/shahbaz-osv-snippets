@@ -1,0 +1,35 @@
+import React, { useState } from "react";
+
+export function App() {
+  const [checkboxes, setCheckboxes] = useState([]);
+
+  const handleCheck = (id) => {
+    const updatedCheckboxes = checkboxes.map((checkbox) =>
+      checkbox.id === id ? { ...checkbox, isChecked: !checkbox.isChecked } : checkbox
+    );
+
+    setCheckboxes(updatedCheckboxes);
+  };
+
+  const isButtonDisabled = () => checkboxes.every((checkbox) => !checkbox.isChecked);
+
+  const addCheckbox = () => {
+    const newId = checkboxes.length > 0 ? checkboxes[checkboxes.length - 1].id + 1 : 1;
+    setCheckboxes([...checkboxes, { id: newId, isChecked: false }]);
+  };
+
+  return (
+    <div>
+      {checkboxes.map((checkbox) => (
+        <div key={checkbox.id}>
+          <input type="checkbox" checked={checkbox.isChecked} onChange={() => handleCheck(checkbox.id)} />
+          Checkbox {checkbox.id}
+        </div>
+      ))}
+      <button disabled={isButtonDisabled()}>Submit</button>
+      <button onClick={addCheckbox}>Add Checkbox</button>
+    </div>
+  );
+}
+
+
