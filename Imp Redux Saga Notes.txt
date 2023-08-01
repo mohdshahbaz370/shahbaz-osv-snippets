@@ -1,0 +1,26 @@
+In React, Redux Saga is a middleware library that allows you to write asynchronous code that is easier to read, write, and test. It provides several helper functions such as `takeEvery()`, `takeLatest()`, `all()`, `takeEvery()`, and `call()` that make it easier to handle asynchronous actions in your application. ¹²⁴
+
+- `put()` is used to dispatch an action.
+- `call()` is used to call a function.
+- `takeEvery()` is used to listen for every action of a certain type.
+- `takeLatest()` is used to listen for the latest action of a certain type.
+- `all()` is used to run multiple sagas at the same time.
+
+I hope this helps! Let me know if you have any more questions.
+
+Source: Conversation with Bing, 24/5/2023(1) Introduction to Redux Saga - flaviocopes.com. https://flaviocopes.com/redux-saga/ Accessed 24/5/2023.
+(2) reactjs - takeEvery and takeLatest. Why? When to use? Use .... https://stackoverflow.com/questions/61984294/takeevery-and-takelatest-why-when-to-use-use-simultaneously Accessed 24/5/2023.
+(3) API Reference | Redux-Saga - js. https://redux-saga.js.org/docs/api/ Accessed 24/5/2023.
+(4) Pass data from component to action and saga using React/Redux saga. https://stackoverflow.com/questions/48971016/pass-data-from-component-to-action-and-saga-using-react-redux-saga Accessed 24/5/2023.
+(5) Using Saga Helpers | Redux-Saga - js. https://redux-saga.js.org/docs/basics/UsingSagaHelpers/ Accessed 24/5/2023.
+
+
+In Redux Saga, `takeEvery()` and `takeLatest()` are both used to listen for actions of a certain type. The difference between them is that `takeEvery()` will listen for every action of that type and run the saga each time an action is dispatched, while `takeLatest()` will only listen for the latest action of that type and cancel any previous sagas that are still running before running the latest one. ¹⁴⁵
+
+I hope this helps! Let me know if you have any more questions.
+
+Source: Conversation with Bing, 24/5/2023(1) Concurrency | Redux-Saga - js. https://redux-saga.js.org/docs/advanced/Concurrency/ Accessed 24/5/2023.
+(2) reactjs - takeEvery and takeLatest. Why? When to use? Use .... https://stackoverflow.com/questions/61984294/takeevery-and-takelatest-why-when-to-use-use-simultaneously Accessed 24/5/2023.
+(3) The difference between take, takeEvery and takeLatest in redux-saga .... https://www.programmersought.com/article/95693396065/ Accessed 24/5/2023.
+(4) RTK Query vs Redux Saga: What to choose for your next project?. https://dev.to/thisisgazzar/rtk-query-vs-redux-saga-what-to-choose-for-your-next-project-4j5g Accessed 24/5/2023.
+(5) Redux saga: takeLatest vs takeEvery. - Mindroast. https://www.mindroast.com/post/redux-saga-takelatest-vs-takeevery Accessed 24/5/2023.
