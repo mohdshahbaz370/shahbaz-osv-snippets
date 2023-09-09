@@ -315,5 +315,13 @@ g.append("path")
     .attr("d", line);
 }
 
-
+//Event Handling
+d3.select("p")
+    .on("mouseover", function () {
+      d3.select(this).style("color", "green");
+      console.log("shahbaz");
+    })
+    .on("mouseout", function () {
+      d3.select(this).style("color", "yellow");
+    });
 
