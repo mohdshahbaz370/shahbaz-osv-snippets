@@ -1,0 +1,2635 @@
+import React, { useState, useEffect, useRef } from "react";
+import { useTranslation } from "react-i18next";
+import Button from "../../../../common/button/Button";
+import Select from "react-select";
+import SelectStyle from "../../../../config/select";
+import SliderPopup from "../../../payments/features/SliderPopup";
+import AddBudget from "./AddBudget";
+import moment from "moment";
+import { useSelector, useDispatch } from "react-redux";
+import { ActionTypesFactory } from "../../../api_user/Helper";
+import { getUserFromStore, getCompanyId } from "../../../../utils/roleHelper";
+import BudgetLineChart from "./BudgetLineChart";
+import { millify } from "../../../../utils/roleHelper";
+
+export const XAxisLabels = (d: any, duration: any) => {
+  if (duration === "THM" || duration === "LSM") {
+    if (d === 1) return "1-7";
+    if (d === 2) return "9-16";
+    if (d === 3) return "17-24";
+    if (d === 4) return "24-31";
+  } else if (duration === "L3M") {
+    if (d === 3) return moment().format("MMM");
+    if (d === 2) return moment().subtract(1, "months").format("MMM");
+    if (d === 1) return moment().subtract(2, "months").format("MMM");
+  } else if (duration === "L6M") {
+    if (d === 6) return moment().format("MMM");
+    if (d === 5) return moment().subtract(1, "months").format("MMM");
+    if (d === 4) return moment().subtract(2, "months").format("MMM");
+    if (d === 3) return moment().subtract(3, "months").format("MMM");
+    if (d === 2) return moment().subtract(4, "months").format("MMM");
+    if (d === 1) return moment().subtract(5, "months").format("MMM");
+  } else if (duration === "12M") {
+    if (d === 12) return moment().format("MMM");
+    if (d === 11) return moment().subtract(1, "months").format("MMM");
+    if (d === 10) return moment().subtract(2, "months").format("MMM");
+    if (d === 9) return moment().subtract(3, "months").format("MMM");
+    if (d === 8) return moment().subtract(4, "months").format("MMM");
+    if (d === 7) return moment().subtract(5, "months").format("MMM");
+    if (d === 6) return moment().subtract(6, "months").format("MMM");
+    if (d === 5) return moment().subtract(7, "months").format("MMM");
+    if (d === 4) return moment().subtract(8, "months").format("MMM");
+    if (d === 3) return moment().subtract(9, "months").format("MMM");
+    if (d === 2) return moment().subtract(10, "months").format("MMM");
+    if (d === 1) return moment().subtract(11, "months").format("MMM");
+  } else if (duration === 1) {
+    if (d === 1) return moment().format("MMM");
+  } else if (duration === 2) {
+    if (d === 2) return moment().format("MMM");
+    if (d === 1) return moment().subtract(1, "months").format("MMM");
+  } else if (duration === 3) {
+    if (d === 3) return moment().format("MMM");
+    if (d === 2) return moment().subtract(1, "months").format("MMM");
+    if (d === 1) return moment().subtract(2, "months").format("MMM");
+  } else if (duration === 4) {
+    if (d === 4) return moment().format("MMM");
+    if (d === 3) return moment().subtract(1, "months").format("MMM");
+    if (d === 2) return moment().subtract(2, "months").format("MMM");
+    if (d === 1) return moment().subtract(3, "months").format("MMM");
+  } else if (duration === 5) {
+    if (d === 5) return moment().format("MMM");
+    if (d === 4) return moment().subtract(1, "months").format("MMM");
+    if (d === 3) return moment().subtract(2, "months").format("MMM");
+    if (d === 2) return moment().subtract(3, "months").format("MMM");
+    if (d === 1) return moment().subtract(4, "months").format("MMM");
+  } else if (duration === 6) {
+    if (d === 6) return moment().format("MMM");
+    if (d === 5) return moment().subtract(1, "months").format("MMM");
+    if (d === 4) return moment().subtract(2, "months").format("MMM");
+    if (d === 3) return moment().subtract(3, "months").format("MMM");
+    if (d === 2) return moment().subtract(4, "months").format("MMM");
+    if (d === 1) return moment().subtract(5, "months").format("MMM");
+  } else if (duration === 7) {
+    if (d === 7) return moment().format("MMM");
+    if (d === 6) return moment().subtract(1, "months").format("MMM");
+    if (d === 5) return moment().subtract(2, "months").format("MMM");
+    if (d === 4) return moment().subtract(3, "months").format("MMM");
+    if (d === 3) return moment().subtract(4, "months").format("MMM");
+    if (d === 2) return moment().subtract(5, "months").format("MMM");
+    if (d === 1) return moment().subtract(6, "months").format("MMM");
+  } else if (duration === 8) {
+    if (d === 8) return moment().format("MMM");
+    if (d === 7) return moment().subtract(1, "months").format("MMM");
+    if (d === 6) return moment().subtract(2, "months").format("MMM");
+    if (d === 5) return moment().subtract(3, "months").format("MMM");
+    if (d === 4) return moment().subtract(4, "months").format("MMM");
+    if (d === 3) return moment().subtract(5, "months").format("MMM");
+    if (d === 2) return moment().subtract(6, "months").format("MMM");
+    if (d === 1) return moment().subtract(7, "months").format("MMM");
+  } else if (duration === 9) {
+    if (d === 9) return moment().format("MMM");
+    if (d === 8) return moment().subtract(1, "months").format("MMM");
+    if (d === 7) return moment().subtract(2, "months").format("MMM");
+    if (d === 6) return moment().subtract(3, "months").format("MMM");
+    if (d === 5) return moment().subtract(4, "months").format("MMM");
+    if (d === 4) return moment().subtract(5, "months").format("MMM");
+    if (d === 3) return moment().subtract(6, "months").format("MMM");
+    if (d === 2) return moment().subtract(7, "months").format("MMM");
+    if (d === 1) return moment().subtract(8, "months").format("MMM");
+  } else if (duration === 10) {
+    if (d === 10) return moment().format("MMM");
+    if (d === 9) return moment().subtract(1, "months").format("MMM");
+    if (d === 8) return moment().subtract(2, "months").format("MMM");
+    if (d === 7) return moment().subtract(3, "months").format("MMM");
+    if (d === 6) return moment().subtract(4, "months").format("MMM");
+    if (d === 5) return moment().subtract(5, "months").format("MMM");
+    if (d === 4) return moment().subtract(6, "months").format("MMM");
+    if (d === 3) return moment().subtract(7, "months").format("MMM");
+    if (d === 2) return moment().subtract(8, "months").format("MMM");
+    if (d === 1) return moment().subtract(9, "months").format("MMM");
+  } else if (duration === 11) {
+    if (d === 11) return moment().format("MMM");
+    if (d === 10) return moment().subtract(1, "months").format("MMM");
+    if (d === 9) return moment().subtract(2, "months").format("MMM");
+    if (d === 8) return moment().subtract(3, "months").format("MMM");
+    if (d === 7) return moment().subtract(4, "months").format("MMM");
+    if (d === 6) return moment().subtract(5, "months").format("MMM");
+    if (d === 5) return moment().subtract(6, "months").format("MMM");
+    if (d === 4) return moment().subtract(7, "months").format("MMM");
+    if (d === 3) return moment().subtract(8, "months").format("MMM");
+    if (d === 2) return moment().subtract(9, "months").format("MMM");
+    if (d === 1) return moment().subtract(10, "months").format("MMM");
+  } else if (duration === 12) {
+    if (d === 12) return moment().format("MMM");
+    if (d === 11) return moment().subtract(1, "months").format("MMM");
+    if (d === 10) return moment().subtract(2, "months").format("MMM");
+    if (d === 9) return moment().subtract(3, "months").format("MMM");
+    if (d === 8) return moment().subtract(4, "months").format("MMM");
+    if (d === 7) return moment().subtract(5, "months").format("MMM");
+    if (d === 6) return moment().subtract(6, "months").format("MMM");
+    if (d === 5) return moment().subtract(7, "months").format("MMM");
+    if (d === 4) return moment().subtract(8, "months").format("MMM");
+    if (d === 3) return moment().subtract(9, "months").format("MMM");
+    if (d === 2) return moment().subtract(10, "months").format("MMM");
+    if (d === 1) return moment().subtract(11, "months").format("MMM");
+  }
+};
+
+const AllBudget = () => {
+  const { t, i18n } = useTranslation();
+  const dispatch = useDispatch();
+  const user = getUserFromStore();
+  const efmloadCategories = useSelector(
+    (state: any) => state?.obServices?.efmloadCategories
+  );
+  const budgetDashboard = useSelector(
+    (state: any) => state?.obServices?.efmbudgetDashboard
+  );
+  const [selectedOption, setSelectedOption] = useState({
+    label: t("thisMonth"),
+    value: "THM",
+  });
+  const [isOpenPopup, setIsOpenPopup] = useState(false);
+  const [isPeriod, setIsPeriod] = useState(() => moment().format("MMM"));
+  const [isCategAside, setIsCategAside] = useState(false);
+  const [isCategAsideOpen, setIsCategAsideOpen] = useState("");
+  const [formikRef, setFormikRef] = useState("");
+  const [isEdit, setIsEdit] = useState(false);
+  const [categAsideLabels, setCategAsideLabels] = useState({});
+  const [showTooltip, setShowTooltip] = useState({} as any);
+  const [selectedDuration, setSelectedDuration] = useState("THM");
+  const toolTipRef: any = useRef(null);
+  const [graphData, setGraphData] = useState([]);
+  const [graphData2, setGraphData2] = useState([]);
+  const [xAxisValues, setXAxisValues] = useState([]);
+  const [newXDomain, setNewXDomain] = useState([]);
+  const [durationDate, setDurationDate] = useState({});
+  const [isIncomeGraph, setIsIncomeGraph] = useState(null);
+  const [isBudgetData, setIsBudgetData] = useState(null);
+  // const [lineGraphData, setlineGraphData] = useState([
+  //     { date: "23/09/18", balance: 4000 },
+  //     { date: "23/09/28", balance: 3000 },
+  //     { date: "23/09/10", balance: 200000 },
+  //     // { date: "2023/09/05", balance: 250 },
+  //   ])
+  const [lineGraphData, setlineGraphData] = useState([]);
+  const [isDownArrow, setIsDownArrow] = useState(true);
+  const [isIncExpGraph, setIsIncExpGraph] = useState(true);
+  const [incExpGraphDuration, setIncExpGraphDuration] = useState("THM");
+  const [thisYearDuration, setThisYearDuration] = useState("");
+  const [maxDomainIncExpGraph, setMaxDomainIncExpGraph] = useState({});
+  const currencyFormatter = require("currency-formatter");
+
+  const displayDates = (selectedDuration: any) => {
+    switch (selectedDuration) {
+      case "THM":
+        return moment().format("MMMM YYYY");
+      case "LSM":
+        return moment().subtract(1, "months").format("MMMM YYYY");
+      case "L3M":
+        return (
+          moment().subtract(2, "months").format("MMMM YYYY") +
+          " - " +
+          moment().format("MMMM YYYY")
+        );
+      case "L6M":
+        return (
+          moment().subtract(5, "months").format("MMMM YYYY") +
+          " - " +
+          moment().format("MMMM YYYY")
+        );
+      case "THY":
+        return (
+          moment().startOf("year").format("MMMM YYYY") +
+          " - " +
+          moment().format("MMMM YYYY")
+        );
+      case "12M":
+        return (
+          moment().subtract(11, "months").format("MMMM YYYY") +
+          " - " +
+          moment().format("MMMM YYYY")
+        );
+    }
+  };
+
+  useEffect(() => {
+    dispatch({
+      type: ActionTypesFactory("EFM", "BUDGET_DASHBOARD").REQUEST,
+      payload: {
+        //  userId: user._id,
+        //  companyId: user.fk_company_id,
+        // companyId: getCompanyId()?.[0],
+        userId: user._id,
+        companyId: user.fk_company_id?.[0],
+        startDate: "2019-01-01",
+        endDate: "2019-03-30",
+        timeline: "LSM",
+      },
+    });
+    dispatch({
+      type: ActionTypesFactory("EFM", "LOAD_CATEGORY").REQUEST,
+      payload: {
+        userId: user._id,
+      },
+    });
+  }, []);
+
+  useEffect(() => {
+    setlineGraphData(
+      isIncomeGraph
+        ? budgetDashboard?.data?.income?.linearGrphData
+        : budgetDashboard?.data?.expense?.linearGrphData
+    );
+  }, [
+    budgetDashboard?.data?.income?.linearGrphData,
+    budgetDashboard?.data?.expense?.linearGrphData,
+    isIncomeGraph,
+  ]);
+
+  const handleClickOutside = (event: any) => {
+    if (
+      toolTipRef?.current?.length &&
+      (toolTipRef?.current?.indexOf(event?.target) > -1 ||
+        event?.target?.className === "transcationTooltip")
+    ) {
+      return;
+    }
+    setShowTooltip({});
+  };
+  useEffect(() => {
+    document.addEventListener("click", handleClickOutside);
+
+    return () => {
+      document.removeEventListener("click", handleClickOutside);
+    };
+  }, [showTooltip]);
+
+  useEffect(() => {
+    if (isIncExpGraph) {
+      let graphDataFormat = [];
+      let graphDataFormat2 = [];
+      // const income = budgetDashboard?.data?.income?.totalIncomeAmount
+      const income = 5000;
+      // const expense = budgetDashboard?.data?.expense?.totalExpenseAmount
+      const expense = 3000;
+      const max = Math.max(income, expense);
+      setMaxDomainIncExpGraph(max);
+      if (incExpGraphDuration === "THY") {
+        const duration = moment().format("MM");
+        setIncExpGraphDuration(parseInt(duration));
+        setNewXDomain([1, parseInt(duration)]);
+        switch (duration) {
+          case "01":
+            graphDataFormat = [{ date: 1, balance: 0 }, { date: 4 }];
+            graphDataFormat2 = [{ date: 1, balance: 0 }, { date: 4 }];
+            graphDataFormat[1].balance = income;
+            graphDataFormat2[1].balance = expense;
+            setGraphData(graphDataFormat);
+            setGraphData2(graphDataFormat2);
+            setXAxisValues([1, 2, 3, 4]);
+            break;
+          case "02":
+            graphDataFormat = [{ date: 1, balance: 0 }, { date: 2 }];
+            graphDataFormat2 = [{ date: 1, balance: 0 }, { date: 2 }];
+            graphDataFormat[1].balance = income;
+            graphDataFormat2[1].balance = expense;
+            setGraphData(graphDataFormat);
+            setGraphData2(graphDataFormat2);
+            setXAxisValues([1, 2]);
+            break;
+          case "03":
+            graphDataFormat = [{ date: 1, balance: 0 }, { date: 3 }];
+            graphDataFormat2 = [{ date: 1, balance: 0 }, { date: 3 }];
+            graphDataFormat[1].balance = income;
+            graphDataFormat2[1].balance = expense;
+            setGraphData(graphDataFormat);
+            setGraphData2(graphDataFormat2);
+            setXAxisValues([1, 2, 3]);
+            break;
+          case "04":
+            graphDataFormat = [{ date: 1, balance: 0 }, { date: 4 }];
+            graphDataFormat2 = [{ date: 1, balance: 0 }, { date: 4 }];
+            graphDataFormat[1].balance = income;
+            graphDataFormat2[1].balance = expense;
+            setGraphData(graphDataFormat);
+            setGraphData2(graphDataFormat2);
+            setXAxisValues([1, 2, 3, 4]);
+            break;
+          case "05":
+            graphDataFormat = [{ date: 1, balance: 0 }, { date: 5 }];
+            graphDataFormat2 = [{ date: 1, balance: 0 }, { date: 5 }];
+            graphDataFormat[1].balance = income;
+            graphDataFormat2[1].balance = expense;
+            setGraphData(graphDataFormat);
+            setGraphData2(graphDataFormat2);
+            setXAxisValues([1, 2, 3, 4, 5]);
+            break;
+          case "06":
+            graphDataFormat = [{ date: 1, balance: 0 }, { date: 6 }];
+            graphDataFormat2 = [{ date: 1, balance: 0 }, { date: 6 }];
+            graphDataFormat[1].balance = income;
+            graphDataFormat2[1].balance = expense;
+            setGraphData(graphDataFormat);
+            setGraphData2(graphDataFormat2);
+            setXAxisValues([1, 2, 3, 4, 5, 6]);
+            break;
+          case "07":
+            graphDataFormat = [{ date: 1, balance: 0 }, { date: 7 }];
+            graphDataFormat2 = [{ date: 1, balance: 0 }, { date: 7 }];
+            graphDataFormat[1].balance = income;
+            graphDataFormat2[1].balance = expense;
+            setGraphData(graphDataFormat);
+            setGraphData2(graphDataFormat2);
+            setXAxisValues([1, 2, 3, 4, 5, 6, 7]);
+            break;
+          case "08":
+            graphDataFormat = [{ date: 1, balance: 0 }, { date: 8 }];
+            graphDataFormat2 = [{ date: 1, balance: 0 }, { date: 8 }];
+            graphDataFormat[1].balance = income;
+            graphDataFormat2[1].balance = expense;
+            setGraphData(graphDataFormat);
+            setGraphData2(graphDataFormat2);
+            setXAxisValues([1, 2, 3, 4, 5, 6, 7, 8]);
+            break;
+          case "09":
+            graphDataFormat = [{ date: 1, balance: 0 }, { date: 9 }];
+            graphDataFormat2 = [{ date: 1, balance: 0 }, { date: 9 }];
+            graphDataFormat[1].balance = income;
+            graphDataFormat2[1].balance = expense;
+            setGraphData(graphDataFormat);
+            setGraphData2(graphDataFormat2);
+            setXAxisValues([1, 2, 3, 4, 5, 6, 7, 8, 9]);
+            break;
+          case "10":
+            graphDataFormat = [{ date: 1, balance: 0 }, { date: 10 }];
+            graphDataFormat2 = [{ date: 1, balance: 0 }, { date: 10 }];
+            graphDataFormat[1].balance = income;
+            graphDataFormat2[1].balance = expense;
+            setGraphData(graphDataFormat);
+            setGraphData2(graphDataFormat2);
+            setXAxisValues([1, 2, 3, 4, 5, 6, 7, 8, 9, 10]);
+            break;
+          case "11":
+            graphDataFormat = [{ date: 1, balance: 0 }, { date: 11 }];
+            graphDataFormat2 = [{ date: 1, balance: 0 }, { date: 11 }];
+            graphDataFormat[1].balance = income;
+            graphDataFormat2[1].balance = expense;
+            setGraphData(graphDataFormat);
+            setGraphData2(graphDataFormat2);
+            setXAxisValues([1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]);
+            break;
+          case "12":
+            graphDataFormat = [{ date: 1, balance: 0 }, { date: 12 }];
+            graphDataFormat2 = [{ date: 1, balance: 0 }, { date: 12 }];
+            graphDataFormat[1].balance = income;
+            graphDataFormat2[1].balance = expense;
+            setGraphData(graphDataFormat);
+            setGraphData2(graphDataFormat2);
+            setXAxisValues([1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]);
+            break;
+        }
+      } else {
+        switch (incExpGraphDuration) {
+          case "L3M":
+            graphDataFormat = [{ date: 1, balance: 0 }, { date: 3 }];
+            graphDataFormat2 = [{ date: 1, balance: 0 }, { date: 3 }];
+            graphDataFormat[1].balance = income;
+            graphDataFormat2[1].balance = expense;
+            setGraphData(graphDataFormat);
+            setGraphData2(graphDataFormat2);
+            setNewXDomain([1, 3]);
+            setXAxisValues([1, 2, 3]);
+            break;
+          case "LSM":
+            graphDataFormat = [{ date: 1, balance: 0 }, { date: 4 }];
+            graphDataFormat2 = [{ date: 1, balance: 0 }, { date: 4 }];
+            graphDataFormat[1].balance = income;
+            graphDataFormat2[1].balance = expense;
+            setGraphData(graphDataFormat);
+            setGraphData2(graphDataFormat2);
+            setNewXDomain([1, 4]);
+            setXAxisValues([1, 2, 3, 4]);
+            break;
+          case "THM":
+            graphDataFormat = [{ date: 1, balance: 0 }, { date: 4 }];
+            graphDataFormat2 = [{ date: 1, balance: 0 }, { date: 4 }];
+            graphDataFormat[1].balance = income;
+            graphDataFormat2[1].balance = expense;
+            setGraphData(graphDataFormat);
+            setGraphData2(graphDataFormat2);
+            setNewXDomain([1, 4]);
+            setXAxisValues([1, 2, 3, 4]);
+            break;
+          case "L6M":
+            graphDataFormat = [{ date: 1, balance: 0 }, { date: 6 }];
+            graphDataFormat2 = [{ date: 1, balance: 0 }, { date: 6 }];
+            graphDataFormat[1].balance = income;
+            graphDataFormat2[1].balance = expense;
+            setGraphData(graphDataFormat);
+            setGraphData2(graphDataFormat2);
+            setNewXDomain([1, 6]);
+            setXAxisValues([1, 2, 3, 4, 5, 6]);
+            break;
+          case "12M":
+            graphDataFormat = [{ date: 1, balance: 0 }, { date: 12 }];
+            graphDataFormat2 = [{ date: 1, balance: 0 }, { date: 12 }];
+            graphDataFormat[1].balance = income;
+            graphDataFormat2[1].balance = expense;
+            setGraphData(graphDataFormat);
+            setGraphData2(graphDataFormat2);
+            setNewXDomain([1, 12]);
+            setXAxisValues([1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]);
+            break;
+        }
+      }
+    } else if (selectedDuration === "L3M") {
+      const graphDataFormat = [{ date: 1 }, { date: 2 }, { date: 3 }];
+      const oneMonth = lineGraphData?.filter((itm) =>
+        moment(itm?.date, "YY/MM/DD").isBetween(
+          moment().startOf("month").subtract(1, "days"),
+          moment().endOf("month")
+        )
+      );
+      const twoMonth = lineGraphData?.filter((itm) =>
+        moment(itm?.date, "YY/MM/DD").isBetween(
+          moment().subtract(1, "months").startOf("month").subtract(1, "days"),
+          moment().subtract(1, "months").endOf("month")
+        )
+      );
+      const threeMonth = lineGraphData?.filter((itm) =>
+        moment(itm?.date, "YY/MM/DD").isBetween(
+          moment().subtract(2, "months").startOf("month").subtract(1, "days"),
+          moment().subtract(2, "months").endOf("month")
+        )
+      );
+      let balanceOneMonth = 0;
+      let balanceTwoMonth = 0;
+      let balanceThreeMonth = 0;
+
+      oneMonth?.forEach((itm) => (balanceOneMonth += itm?.balance));
+      twoMonth?.forEach((itm) => (balanceTwoMonth += itm?.balance));
+      threeMonth?.forEach((itm) => (balanceThreeMonth += itm?.balance));
+      graphDataFormat[0].balance = balanceThreeMonth;
+      graphDataFormat[1].balance = balanceTwoMonth;
+      graphDataFormat[2].balance = balanceOneMonth;
+      setGraphData(graphDataFormat);
+      setXAxisValues([1, 2, 3]);
+      setNewXDomain([1, 3]);
+    } else if (selectedDuration === "L6M") {
+      const graphDataFormat = [
+        { date: 1 },
+        { date: 2 },
+        { date: 3 },
+        { date: 4 },
+        { date: 5 },
+        { date: 6 },
+      ];
+      const oneMonth = lineGraphData?.filter((itm) =>
+        moment(itm?.date, "YY/MM/DD").isBetween(
+          moment().startOf("month").subtract(1, "days"),
+          moment().endOf("month")
+        )
+      );
+      const twoMonth = lineGraphData?.filter((itm) =>
+        moment(itm?.date, "YY/MM/DD").isBetween(
+          moment().subtract(1, "months").startOf("month").subtract(1, "days"),
+          moment().subtract(1, "months").endOf("month")
+        )
+      );
+      const threeMonth = lineGraphData?.filter((itm) =>
+        moment(itm?.date, "YY/MM/DD").isBetween(
+          moment().subtract(2, "months").startOf("month").subtract(1, "days"),
+          moment().subtract(2, "months").endOf("month")
+        )
+      );
+      const fourMonth = lineGraphData?.filter((itm) =>
+        moment(itm?.date, "YY/MM/DD").isBetween(
+          moment().subtract(3, "months").startOf("month").subtract(1, "days"),
+          moment().subtract(3, "months").endOf("month")
+        )
+      );
+      const fiveMonth = lineGraphData?.filter((itm) =>
+        moment(itm?.date, "YY/MM/DD").isBetween(
+          moment().subtract(4, "months").startOf("month").subtract(1, "days"),
+          moment().subtract(4, "months").endOf("month")
+        )
+      );
+      const sixMonth = lineGraphData?.filter((itm) =>
+        moment(itm?.date, "YY/MM/DD").isBetween(
+          moment().subtract(5, "months").startOf("month").subtract(1, "days"),
+          moment().subtract(5, "months").endOf("month")
+        )
+      );
+
+      let balanceOneMonth = 0;
+      let balanceTwoMonth = 0;
+      let balanceThreeMonth = 0;
+      let balanceFourMonth = 0;
+      let balanceFiveMonth = 0;
+      let balanceSixMonth = 0;
+
+      oneMonth?.forEach((itm) => (balanceOneMonth += itm?.balance));
+      twoMonth?.forEach((itm) => (balanceTwoMonth += itm?.balance));
+      threeMonth?.forEach((itm) => (balanceThreeMonth += itm?.balance));
+      fourMonth?.forEach((itm) => (balanceFourMonth += itm?.balance));
+      fiveMonth?.forEach((itm) => (balanceFiveMonth += itm?.balance));
+      sixMonth?.forEach((itm) => (balanceSixMonth += itm?.balance));
+      graphDataFormat[0].balance = balanceSixMonth;
+      graphDataFormat[1].balance = balanceFiveMonth;
+      graphDataFormat[2].balance = balanceFourMonth;
+      graphDataFormat[3].balance = balanceThreeMonth;
+      graphDataFormat[4].balance = balanceTwoMonth;
+      graphDataFormat[5].balance = balanceOneMonth;
+      setGraphData(graphDataFormat);
+      setXAxisValues([1, 2, 3, 4, 5, 6]);
+      setNewXDomain([1, 6]);
+    } else if (selectedDuration === "12M") {
+      const graphDataFormat = [
+        { date: 1 },
+        { date: 2 },
+        { date: 3 },
+        { date: 4 },
+        { date: 5 },
+        { date: 6 },
+        { date: 7 },
+        { date: 8 },
+        { date: 9 },
+        { date: 10 },
+        { date: 11 },
+        { date: 12 },
+      ];
+      const oneMonth = lineGraphData?.filter((itm) =>
+        moment(itm?.date, "YY/MM/DD").isBetween(
+          moment().startOf("month").subtract(1, "days"),
+          moment().endOf("month")
+        )
+      );
+      const twoMonth = lineGraphData?.filter((itm) =>
+        moment(itm?.date, "YY/MM/DD").isBetween(
+          moment().subtract(1, "months").startOf("month").subtract(1, "days"),
+          moment().subtract(1, "months").endOf("month")
+        )
+      );
+      const threeMonth = lineGraphData?.filter((itm) =>
+        moment(itm?.date, "YY/MM/DD").isBetween(
+          moment().subtract(2, "months").startOf("month").subtract(1, "days"),
+          moment().subtract(2, "months").endOf("month")
+        )
+      );
+      const fourMonth = lineGraphData?.filter((itm) =>
+        moment(itm?.date, "YY/MM/DD").isBetween(
+          moment().subtract(3, "months").startOf("month").subtract(1, "days"),
+          moment().subtract(3, "months").endOf("month")
+        )
+      );
+      const fiveMonth = lineGraphData?.filter((itm) =>
+        moment(itm?.date, "YY/MM/DD").isBetween(
+          moment().subtract(4, "months").startOf("month").subtract(1, "days"),
+          moment().subtract(4, "months").endOf("month")
+        )
+      );
+      const sixMonth = lineGraphData?.filter((itm) =>
+        moment(itm?.date, "YY/MM/DD").isBetween(
+          moment().subtract(5, "months").startOf("month").subtract(1, "days"),
+          moment().subtract(5, "months").endOf("month")
+        )
+      );
+      const sevenMonth = lineGraphData?.filter((itm) =>
+        moment(itm?.date, "YY/MM/DD").isBetween(
+          moment().subtract(6, "months").startOf("month").subtract(1, "days"),
+          moment().subtract(6, "months").endOf("month")
+        )
+      );
+      const eightMonth = lineGraphData?.filter((itm) =>
+        moment(itm?.date, "YY/MM/DD").isBetween(
+          moment().subtract(7, "months").startOf("month").subtract(1, "days"),
+          moment().subtract(7, "months").endOf("month")
+        )
+      );
+      const nineMonth = lineGraphData?.filter((itm) =>
+        moment(itm?.date, "YY/MM/DD").isBetween(
+          moment().subtract(8, "months").startOf("month").subtract(1, "days"),
+          moment().subtract(8, "months").endOf("month")
+        )
+      );
+      const tenMonth = lineGraphData?.filter((itm) =>
+        moment(itm?.date, "YY/MM/DD").isBetween(
+          moment().subtract(9, "months").startOf("month").subtract(1, "days"),
+          moment().subtract(9, "months").endOf("month")
+        )
+      );
+      const elevenMonth = lineGraphData?.filter((itm) =>
+        moment(itm?.date, "YY/MM/DD").isBetween(
+          moment().subtract(10, "months").startOf("month").subtract(1, "days"),
+          moment().subtract(10, "months").endOf("month")
+        )
+      );
+      const twelveMonth = lineGraphData?.filter((itm) =>
+        moment(itm?.date, "YY/MM/DD").isBetween(
+          moment().subtract(11, "months").startOf("month").subtract(1, "days"),
+          moment().subtract(11, "months").endOf("month")
+        )
+      );
+
+      let balanceOneMonth = 0;
+      let balanceTwoMonth = 0;
+      let balanceThreeMonth = 0;
+      let balanceFourMonth = 0;
+      let balanceFiveMonth = 0;
+      let balanceSixMonth = 0;
+      let balanceSevenMonth = 0;
+      let balanceEightMonth = 0;
+      let balanceNineMonth = 0;
+      let balanceTenMonth = 0;
+      let balanceElevenMonth = 0;
+      let balanceTwelveMonth = 0;
+
+      oneMonth?.forEach((itm) => (balanceOneMonth += itm?.balance));
+      twoMonth?.forEach((itm) => (balanceTwoMonth += itm?.balance));
+      threeMonth?.forEach((itm) => (balanceThreeMonth += itm?.balance));
+      fourMonth?.forEach((itm) => (balanceFourMonth += itm?.balance));
+      fiveMonth?.forEach((itm) => (balanceFiveMonth += itm?.balance));
+      sixMonth?.forEach((itm) => (balanceSixMonth += itm?.balance));
+      sevenMonth?.forEach((itm) => (balanceSevenMonth += itm?.balance));
+      eightMonth?.forEach((itm) => (balanceEightMonth += itm?.balance));
+      nineMonth?.forEach((itm) => (balanceNineMonth += itm?.balance));
+      tenMonth?.forEach((itm) => (balanceTenMonth += itm?.balance));
+      elevenMonth?.forEach((itm) => (balanceElevenMonth += itm?.balance));
+      twelveMonth?.forEach((itm) => (balanceTwelveMonth += itm?.balance));
+      graphDataFormat[0].balance = balanceTwelveMonth;
+      graphDataFormat[1].balance = balanceElevenMonth;
+      graphDataFormat[2].balance = balanceTenMonth;
+      graphDataFormat[3].balance = balanceNineMonth;
+      graphDataFormat[4].balance = balanceEightMonth;
+      graphDataFormat[5].balance = balanceSevenMonth;
+      graphDataFormat[6].balance = balanceSixMonth;
+      graphDataFormat[7].balance = balanceFiveMonth;
+      graphDataFormat[8].balance = balanceFourMonth;
+      graphDataFormat[9].balance = balanceThreeMonth;
+      graphDataFormat[10].balance = balanceTwoMonth;
+      graphDataFormat[11].balance = balanceOneMonth;
+      setGraphData(graphDataFormat);
+      setXAxisValues([1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]);
+      setNewXDomain([1, 12]);
+    } else if (selectedDuration === "THM") {
+      const graphDataFormat = [
+        { date: 1 },
+        { date: 2 },
+        { date: 3 },
+        { date: 4 },
+      ];
+      const oneToSeven = lineGraphData?.filter((itm) =>
+        moment(itm?.date, "YY/MM/DD").isBefore(
+          moment().startOf("month").add(7, "days")
+        )
+      );
+      const sevenToSixteen = lineGraphData?.filter((itm) =>
+        moment(itm?.date, "YY/MM/DD").isBetween(
+          moment().startOf("month").add(7, "days"),
+          moment().startOf("month").add(16, "days")
+        )
+      );
+      const seventeenToTwentyFour = lineGraphData?.filter((itm) =>
+        moment(itm?.date, "YY/MM/DD").isBetween(
+          moment().startOf("month").add(15, "days"),
+          moment().startOf("month").add(24, "days")
+        )
+      );
+      const TwentyFourToThirtyOne = lineGraphData?.filter((itm) =>
+        moment(itm?.date, "YY/MM/DD").isBetween(
+          moment().startOf("month").add(22, "days"),
+          moment().startOf("month").add(30, "days")
+        )
+      );
+      let balance7 = 0;
+      let balance16 = 0;
+      let balance24 = 0;
+      let balance31 = 0;
+      oneToSeven?.forEach((itm) => (balance7 += itm?.balance));
+      sevenToSixteen?.forEach((itm) => (balance16 += itm?.balance));
+      seventeenToTwentyFour?.forEach((itm) => (balance24 += itm?.balance));
+      TwentyFourToThirtyOne?.forEach((itm) => (balance31 += itm?.balance));
+      graphDataFormat[0].balance = balance7;
+      graphDataFormat[1].balance = balance16;
+      graphDataFormat[2].balance = balance24;
+      graphDataFormat[3].balance = balance31;
+      setGraphData(graphDataFormat);
+      setXAxisValues([1, 2, 3, 4]);
+      setNewXDomain([1, 4]);
+    } else if (selectedDuration === "LSM") {
+      const graphDataFormat = [
+        { date: 1 },
+        { date: 2 },
+        { date: 3 },
+        { date: 4 },
+      ];
+      const oneToSeven = lineGraphData?.filter((itm) =>
+        moment(itm?.date, "YY/MM/DD").isBefore(
+          moment().subtract(1, "months").startOf("month").add(7, "days")
+        )
+      );
+      const sevenToSixteen = lineGraphData?.filter((itm) =>
+        moment(itm?.date, "YY/MM/DD").isBetween(
+          moment().subtract(1, "months").startOf("month").add(7, "days"),
+          moment().subtract(1, "months").startOf("month").add(16, "days")
+        )
+      );
+      const seventeenToTwentyFour = lineGraphData?.filter((itm) =>
+        moment(itm?.date, "YY/MM/DD").isBetween(
+          moment().subtract(1, "months").startOf("month").add(15, "days"),
+          moment().subtract(1, "months").startOf("month").add(24, "days")
+        )
+      );
+      const TwentyFourToThirtyOne = lineGraphData?.filter((itm) =>
+        moment(itm?.date, "YY/MM/DD").isBetween(
+          moment().subtract(1, "months").startOf("month").add(22, "days"),
+          moment().subtract(1, "months").startOf("month").add(31, "days")
+        )
+      );
+      let balance7 = 0;
+      let balance16 = 0;
+      let balance24 = 0;
+      let balance31 = 0;
+      oneToSeven?.forEach((itm) => (balance7 += itm?.balance));
+      sevenToSixteen?.forEach((itm) => (balance16 += itm?.balance));
+      seventeenToTwentyFour?.forEach((itm) => (balance24 += itm?.balance));
+      TwentyFourToThirtyOne?.forEach((itm) => (balance31 += itm?.balance));
+      graphDataFormat[0].balance = balance7;
+      graphDataFormat[1].balance = balance16;
+      graphDataFormat[2].balance = balance24;
+      graphDataFormat[3].balance = balance31;
+      setGraphData(graphDataFormat);
+      setXAxisValues([1, 2, 3, 4]);
+      setNewXDomain([1, 4]);
+    } else if (selectedDuration === "THY") {
+      const duration = parseInt(moment().format("MM"));
+      setThisYearDuration(duration);
+      if (duration === 1) {
+        const graphDataFormat = [
+          { date: 1 },
+          { date: 2 },
+          { date: 3 },
+          { date: 4 },
+        ];
+        const oneToSeven = lineGraphData?.filter((itm) =>
+          moment(itm?.date, "YY/MM/DD").isBefore(
+            moment().startOf("month").add(7, "days")
+          )
+        );
+        const sevenToSixteen = lineGraphData?.filter((itm) =>
+          moment(itm?.date, "YY/MM/DD").isBetween(
+            moment().startOf("month").add(7, "days"),
+            moment().startOf("month").add(16, "days")
+          )
+        );
+        const seventeenToTwentyFour = lineGraphData?.filter((itm) =>
+          moment(itm?.date, "YY/MM/DD").isBetween(
+            moment().startOf("month").add(15, "days"),
+            moment().startOf("month").add(24, "days")
+          )
+        );
+        const TwentyFourToThirtyOne = lineGraphData?.filter((itm) =>
+          moment(itm?.date, "YY/MM/DD").isBetween(
+            moment().startOf("month").add(22, "days"),
+            moment().startOf("month").add(30, "days")
+          )
+        );
+        let balance7 = 0;
+        let balance16 = 0;
+        let balance24 = 0;
+        let balance31 = 0;
+        oneToSeven?.forEach((itm) => (balance7 += itm?.balance));
+        sevenToSixteen?.forEach((itm) => (balance16 += itm?.balance));
+        seventeenToTwentyFour?.forEach((itm) => (balance24 += itm?.balance));
+        TwentyFourToThirtyOne?.forEach((itm) => (balance31 += itm?.balance));
+        graphDataFormat[0].balance = balance7;
+        graphDataFormat[1].balance = balance16;
+        graphDataFormat[2].balance = balance24;
+        graphDataFormat[3].balance = balance31;
+        setGraphData(graphDataFormat);
+        setXAxisValues([1, 2, 3, 4]);
+        setNewXDomain([1, 4]);
+      } else if (duration === 2) {
+        const graphDataFormat = [{ date: 1 }, { date: 2 }];
+        const oneMonth = lineGraphData?.filter((itm) =>
+          moment(itm?.date, "YY/MM/DD").isBetween(
+            moment().startOf("month").subtract(1, "days"),
+            moment().endOf("month")
+          )
+        );
+        const twoMonth = lineGraphData?.filter((itm) =>
+          moment(itm?.date, "YY/MM/DD").isBetween(
+            moment().subtract(1, "months").startOf("month").subtract(1, "days"),
+            moment().subtract(1, "months").endOf("month")
+          )
+        );
+        let balanceOneMonth = 0;
+        let balanceTwoMonth = 0;
+        oneMonth?.forEach((itm) => (balanceOneMonth += itm?.balance));
+        twoMonth?.forEach((itm) => (balanceTwoMonth += itm?.balance));
+        graphDataFormat[0].balance = balanceTwoMonth;
+        graphDataFormat[1].balance = balanceOneMonth;
+        setGraphData(graphDataFormat);
+        setXAxisValues([1, 2]);
+        setNewXDomain([1, 2]);
+      } else if (duration === 3) {
+        const graphDataFormat = [{ date: 1 }, { date: 2 }, { date: 3 }];
+        const oneMonth = lineGraphData?.filter((itm) =>
+          moment(itm?.date, "YY/MM/DD").isBetween(
+            moment().startOf("month").subtract(1, "days"),
+            moment().endOf("month")
+          )
+        );
+        const twoMonth = lineGraphData?.filter((itm) =>
+          moment(itm?.date, "YY/MM/DD").isBetween(
+            moment().subtract(1, "months").startOf("month").subtract(1, "days"),
+            moment().subtract(1, "months").endOf("month")
+          )
+        );
+        const threeMonth = lineGraphData?.filter((itm) =>
+          moment(itm?.date, "YY/MM/DD").isBetween(
+            moment().subtract(2, "months").startOf("month").subtract(1, "days"),
+            moment().subtract(2, "months").endOf("month")
+          )
+        );
+        let balanceOneMonth = 0;
+        let balanceTwoMonth = 0;
+        let balanceThreeMonth = 0;
+        oneMonth?.forEach((itm) => (balanceOneMonth += itm?.balance));
+        twoMonth?.forEach((itm) => (balanceTwoMonth += itm?.balance));
+        threeMonth?.forEach((itm) => (balanceThreeMonth += itm?.balance));
+        graphDataFormat[0].balance = balanceThreeMonth;
+        graphDataFormat[1].balance = balanceTwoMonth;
+        graphDataFormat[2].balance = balanceOneMonth;
+        setGraphData(graphDataFormat);
+        setXAxisValues([1, 2, 3]);
+        setNewXDomain([1, 3]);
+      } else if (duration === 4) {
+        const graphDataFormat = [
+          { date: 1 },
+          { date: 2 },
+          { date: 3 },
+          { date: 4 },
+        ];
+        const oneMonth = lineGraphData?.filter((itm) =>
+          moment(itm?.date, "YY/MM/DD").isBetween(
+            moment().startOf("month").subtract(1, "days"),
+            moment().endOf("month")
+          )
+        );
+        const twoMonth = lineGraphData?.filter((itm) =>
+          moment(itm?.date, "YY/MM/DD").isBetween(
+            moment().subtract(1, "months").startOf("month").subtract(1, "days"),
+            moment().subtract(1, "months").endOf("month")
+          )
+        );
+        const threeMonth = lineGraphData?.filter((itm) =>
+          moment(itm?.date, "YY/MM/DD").isBetween(
+            moment().subtract(2, "months").startOf("month").subtract(1, "days"),
+            moment().subtract(2, "months").endOf("month")
+          )
+        );
+        const fourMonth = lineGraphData?.filter((itm) =>
+          moment(itm?.date, "YY/MM/DD").isBetween(
+            moment().subtract(3, "months").startOf("month").subtract(1, "days"),
+            moment().subtract(3, "months").endOf("month")
+          )
+        );
+        let balanceOneMonth = 0;
+        let balanceTwoMonth = 0;
+        let balanceThreeMonth = 0;
+        let balanceFourMonth = 0;
+        oneMonth?.forEach((itm) => (balanceOneMonth += itm?.balance));
+        twoMonth?.forEach((itm) => (balanceTwoMonth += itm?.balance));
+        threeMonth?.forEach((itm) => (balanceThreeMonth += itm?.balance));
+        fourMonth?.forEach((itm) => (balanceFourMonth += itm?.balance));
+        graphDataFormat[0].balance = balanceFourMonth;
+        graphDataFormat[1].balance = balanceThreeMonth;
+        graphDataFormat[2].balance = balanceTwoMonth;
+        graphDataFormat[3].balance = balanceOneMonth;
+        setGraphData(graphDataFormat);
+        setXAxisValues([1, 2, 3, 4]);
+        setNewXDomain([1, 4]);
+      } else if (duration === 5) {
+        const graphDataFormat = [
+          { date: 1 },
+          { date: 1 },
+          { date: 2 },
+          { date: 3 },
+          { date: 4 },
+          { date: 5 },
+        ];
+        const oneMonth = lineGraphData?.filter((itm) =>
+          moment(itm?.date, "YY/MM/DD").isBetween(
+            moment().startOf("month").subtract(1, "days"),
+            moment().endOf("month")
+          )
+        );
+        const twoMonth = lineGraphData?.filter((itm) =>
+          moment(itm?.date, "YY/MM/DD").isBetween(
+            moment().subtract(1, "months").startOf("month").subtract(1, "days"),
+            moment().subtract(1, "months").endOf("month")
+          )
+        );
+        const threeMonth = lineGraphData?.filter((itm) =>
+          moment(itm?.date, "YY/MM/DD").isBetween(
+            moment().subtract(2, "months").startOf("month").subtract(1, "days"),
+            moment().subtract(2, "months").endOf("month")
+          )
+        );
+        const fourMonth = lineGraphData?.filter((itm) =>
+          moment(itm?.date, "YY/MM/DD").isBetween(
+            moment().subtract(3, "months").startOf("month").subtract(1, "days"),
+            moment().subtract(3, "months").endOf("month")
+          )
+        );
+        const fiveMonth = lineGraphData?.filter((itm) =>
+          moment(itm?.date, "YY/MM/DD").isBetween(
+            moment().subtract(4, "months").startOf("month").subtract(1, "days"),
+            moment().subtract(4, "months").endOf("month")
+          )
+        );
+        let balanceOneMonth = 0;
+        let balanceTwoMonth = 0;
+        let balanceThreeMonth = 0;
+        let balanceFourMonth = 0;
+        let balanceFiveMonth = 0;
+        oneMonth?.forEach((itm) => (balanceOneMonth += itm?.balance));
+        twoMonth?.forEach((itm) => (balanceTwoMonth += itm?.balance));
+        threeMonth?.forEach((itm) => (balanceThreeMonth += itm?.balance));
+        fourMonth?.forEach((itm) => (balanceFourMonth += itm?.balance));
+        fiveMonth?.forEach((itm) => (balanceFiveMonth += itm?.balance));
+        graphDataFormat[0].balance = balanceFiveMonth;
+        graphDataFormat[1].balance = balanceFourMonth;
+        graphDataFormat[2].balance = balanceThreeMonth;
+        graphDataFormat[3].balance = balanceTwoMonth;
+        graphDataFormat[4].balance = balanceOneMonth;
+        setGraphData(graphDataFormat);
+        setXAxisValues([1, 2, 3, 4, 5]);
+        setNewXDomain([1, 5]);
+      } else if (duration === 6) {
+        const graphDataFormat = [
+          { date: 1 },
+          { date: 2 },
+          { date: 3 },
+          { date: 4 },
+          { date: 5 },
+          { date: 6 },
+        ];
+        const oneMonth = lineGraphData?.filter((itm) =>
+          moment(itm?.date, "YY/MM/DD").isBetween(
+            moment().startOf("month").subtract(1, "days"),
+            moment().endOf("month")
+          )
+        );
+        const twoMonth = lineGraphData?.filter((itm) =>
+          moment(itm?.date, "YY/MM/DD").isBetween(
+            moment().subtract(1, "months").startOf("month").subtract(1, "days"),
+            moment().subtract(1, "months").endOf("month")
+          )
+        );
+        const threeMonth = lineGraphData?.filter((itm) =>
+          moment(itm?.date, "YY/MM/DD").isBetween(
+            moment().subtract(2, "months").startOf("month").subtract(1, "days"),
+            moment().subtract(2, "months").endOf("month")
+          )
+        );
+        const fourMonth = lineGraphData?.filter((itm) =>
+          moment(itm?.date, "YY/MM/DD").isBetween(
+            moment().subtract(3, "months").startOf("month").subtract(1, "days"),
+            moment().subtract(3, "months").endOf("month")
+          )
+        );
+        const fiveMonth = lineGraphData?.filter((itm) =>
+          moment(itm?.date, "YY/MM/DD").isBetween(
+            moment().subtract(4, "months").startOf("month").subtract(1, "days"),
+            moment().subtract(4, "months").endOf("month")
+          )
+        );
+        const sixMonth = lineGraphData?.filter((itm) =>
+          moment(itm?.date, "YY/MM/DD").isBetween(
+            moment().subtract(5, "months").startOf("month").subtract(1, "days"),
+            moment().subtract(5, "months").endOf("month")
+          )
+        );
+        let balanceOneMonth = 0;
+        let balanceTwoMonth = 0;
+        let balanceThreeMonth = 0;
+        let balanceFourMonth = 0;
+        let balanceFiveMonth = 0;
+        let balanceSixMonth = 0;
+        oneMonth?.forEach((itm) => (balanceOneMonth += itm?.balance));
+        twoMonth?.forEach((itm) => (balanceTwoMonth += itm?.balance));
+        threeMonth?.forEach((itm) => (balanceThreeMonth += itm?.balance));
+        fourMonth?.forEach((itm) => (balanceFourMonth += itm?.balance));
+        fiveMonth?.forEach((itm) => (balanceFiveMonth += itm?.balance));
+        sixMonth?.forEach((itm) => (balanceSixMonth += itm?.balance));
+        graphDataFormat[0].balance = balanceSixMonth;
+        graphDataFormat[1].balance = balanceFiveMonth;
+        graphDataFormat[2].balance = balanceFourMonth;
+        graphDataFormat[3].balance = balanceThreeMonth;
+        graphDataFormat[4].balance = balanceTwoMonth;
+        graphDataFormat[5].balance = balanceOneMonth;
+        setGraphData(graphDataFormat);
+        setXAxisValues([1, 2, 3, 4, 5, 6]);
+        setNewXDomain([1, 6]);
+      } else if (duration === 7) {
+        const graphDataFormat = [
+          { date: 1 },
+          { date: 2 },
+          { date: 3 },
+          { date: 4 },
+          { date: 5 },
+          { date: 6 },
+          { date: 7 },
+        ];
+        const oneMonth = lineGraphData?.filter((itm) =>
+          moment(itm?.date, "YY/MM/DD").isBetween(
+            moment().startOf("month").subtract(1, "days"),
+            moment().endOf("month")
+          )
+        );
+        const twoMonth = lineGraphData?.filter((itm) =>
+          moment(itm?.date, "YY/MM/DD").isBetween(
+            moment().subtract(1, "months").startOf("month").subtract(1, "days"),
+            moment().subtract(1, "months").endOf("month")
+          )
+        );
+        const threeMonth = lineGraphData?.filter((itm) =>
+          moment(itm?.date, "YY/MM/DD").isBetween(
+            moment().subtract(2, "months").startOf("month").subtract(1, "days"),
+            moment().subtract(2, "months").endOf("month")
+          )
+        );
+        const fourMonth = lineGraphData?.filter((itm) =>
+          moment(itm?.date, "YY/MM/DD").isBetween(
+            moment().subtract(3, "months").startOf("month").subtract(1, "days"),
+            moment().subtract(3, "months").endOf("month")
+          )
+        );
+        const fiveMonth = lineGraphData?.filter((itm) =>
+          moment(itm?.date, "YY/MM/DD").isBetween(
+            moment().subtract(4, "months").startOf("month").subtract(1, "days"),
+            moment().subtract(4, "months").endOf("month")
+          )
+        );
+        const sixMonth = lineGraphData?.filter((itm) =>
+          moment(itm?.date, "YY/MM/DD").isBetween(
+            moment().subtract(5, "months").startOf("month").subtract(1, "days"),
+            moment().subtract(5, "months").endOf("month")
+          )
+        );
+        const sevenMonth = lineGraphData?.filter((itm) =>
+          moment(itm?.date, "YY/MM/DD").isBetween(
+            moment().subtract(6, "months").startOf("month").subtract(1, "days"),
+            moment().subtract(6, "months").endOf("month")
+          )
+        );
+        let balanceOneMonth = 0;
+        let balanceTwoMonth = 0;
+        let balanceThreeMonth = 0;
+        let balanceFourMonth = 0;
+        let balanceFiveMonth = 0;
+        let balanceSixMonth = 0;
+        let balanceSevenMonth = 0;
+        oneMonth?.forEach((itm) => (balanceOneMonth += itm?.balance));
+        twoMonth?.forEach((itm) => (balanceTwoMonth += itm?.balance));
+        threeMonth?.forEach((itm) => (balanceThreeMonth += itm?.balance));
+        fourMonth?.forEach((itm) => (balanceFourMonth += itm?.balance));
+        fiveMonth?.forEach((itm) => (balanceFiveMonth += itm?.balance));
+        sixMonth?.forEach((itm) => (balanceSixMonth += itm?.balance));
+        sevenMonth?.forEach((itm) => (balanceSevenMonth += itm?.balance));
+        graphDataFormat[0].balance = balanceSevenMonth;
+        graphDataFormat[1].balance = balanceSixMonth;
+        graphDataFormat[2].balance = balanceFiveMonth;
+        graphDataFormat[3].balance = balanceFourMonth;
+        graphDataFormat[4].balance = balanceThreeMonth;
+        graphDataFormat[5].balance = balanceTwoMonth;
+        graphDataFormat[6].balance = balanceOneMonth;
+        setGraphData(graphDataFormat);
+        setXAxisValues([1, 2, 3, 4, 5, 6, 7]);
+        setNewXDomain([1, 7]);
+      } else if (duration === 8) {
+        const graphDataFormat = [
+          { date: 1 },
+          { date: 2 },
+          { date: 3 },
+          { date: 4 },
+          { date: 5 },
+          { date: 6 },
+          { date: 7 },
+          { date: 8 },
+        ];
+        const oneMonth = lineGraphData?.filter((itm) =>
+          moment(itm?.date, "YY/MM/DD").isBetween(
+            moment().startOf("month").subtract(1, "days"),
+            moment().endOf("month")
+          )
+        );
+        const twoMonth = lineGraphData?.filter((itm) =>
+          moment(itm?.date, "YY/MM/DD").isBetween(
+            moment().subtract(1, "months").startOf("month").subtract(1, "days"),
+            moment().subtract(1, "months").endOf("month")
+          )
+        );
+        const threeMonth = lineGraphData?.filter((itm) =>
+          moment(itm?.date, "YY/MM/DD").isBetween(
+            moment().subtract(2, "months").startOf("month").subtract(1, "days"),
+            moment().subtract(2, "months").endOf("month")
+          )
+        );
+        const fourMonth = lineGraphData?.filter((itm) =>
+          moment(itm?.date, "YY/MM/DD").isBetween(
+            moment().subtract(3, "months").startOf("month").subtract(1, "days"),
+            moment().subtract(3, "months").endOf("month")
+          )
+        );
+        const fiveMonth = lineGraphData?.filter((itm) =>
+          moment(itm?.date, "YY/MM/DD").isBetween(
+            moment().subtract(4, "months").startOf("month").subtract(1, "days"),
+            moment().subtract(4, "months").endOf("month")
+          )
+        );
+        const sixMonth = lineGraphData?.filter((itm) =>
+          moment(itm?.date, "YY/MM/DD").isBetween(
+            moment().subtract(5, "months").startOf("month").subtract(1, "days"),
+            moment().subtract(5, "months").endOf("month")
+          )
+        );
+        const sevenMonth = lineGraphData?.filter((itm) =>
+          moment(itm?.date, "YY/MM/DD").isBetween(
+            moment().subtract(6, "months").startOf("month").subtract(1, "days"),
+            moment().subtract(6, "months").endOf("month")
+          )
+        );
+        const eightMonth = lineGraphData?.filter((itm) =>
+          moment(itm?.date, "YY/MM/DD").isBetween(
+            moment().subtract(7, "months").startOf("month").subtract(1, "days"),
+            moment().subtract(7, "months").endOf("month")
+          )
+        );
+        let balanceOneMonth = 0;
+        let balanceTwoMonth = 0;
+        let balanceThreeMonth = 0;
+        let balanceFourMonth = 0;
+        let balanceFiveMonth = 0;
+        let balanceSixMonth = 0;
+        let balanceSevenMonth = 0;
+        let balanceEightMonth = 0;
+        oneMonth?.forEach((itm) => (balanceOneMonth += itm?.balance));
+        twoMonth?.forEach((itm) => (balanceTwoMonth += itm?.balance));
+        threeMonth?.forEach((itm) => (balanceThreeMonth += itm?.balance));
+        fourMonth?.forEach((itm) => (balanceFourMonth += itm?.balance));
+        fiveMonth?.forEach((itm) => (balanceFiveMonth += itm?.balance));
+        sixMonth?.forEach((itm) => (balanceSixMonth += itm?.balance));
+        sevenMonth?.forEach((itm) => (balanceSevenMonth += itm?.balance));
+        eightMonth?.forEach((itm) => (balanceEightMonth += itm?.balance));
+        graphDataFormat[0].balance = balanceEightMonth;
+        graphDataFormat[1].balance = balanceSevenMonth;
+        graphDataFormat[2].balance = balanceSixMonth;
+        graphDataFormat[3].balance = balanceFiveMonth;
+        graphDataFormat[4].balance = balanceFourMonth;
+        graphDataFormat[5].balance = balanceThreeMonth;
+        graphDataFormat[6].balance = balanceTwoMonth;
+        graphDataFormat[7].balance = balanceOneMonth;
+        setGraphData(graphDataFormat);
+        setXAxisValues([1, 2, 3, 4, 5, 6, 7, 8]);
+        setNewXDomain([1, 8]);
+      } else if (duration === 9) {
+        const graphDataFormat = [
+          { date: 1 },
+          { date: 2 },
+          { date: 3 },
+          { date: 4 },
+          { date: 5 },
+          { date: 6 },
+          { date: 7 },
+          { date: 8 },
+          { date: 9 },
+        ];
+        const oneMonth = lineGraphData?.filter((itm) =>
+          moment(itm?.date, "YY/MM/DD").isBetween(
+            moment().startOf("month").subtract(1, "days"),
+            moment().endOf("month")
+          )
+        );
+        const twoMonth = lineGraphData?.filter((itm) =>
+          moment(itm?.date, "YY/MM/DD").isBetween(
+            moment().subtract(1, "months").startOf("month").subtract(1, "days"),
+            moment().subtract(1, "months").endOf("month")
+          )
+        );
+        const threeMonth = lineGraphData?.filter((itm) =>
+          moment(itm?.date, "YY/MM/DD").isBetween(
+            moment().subtract(2, "months").startOf("month").subtract(1, "days"),
+            moment().subtract(2, "months").endOf("month")
+          )
+        );
+        const fourMonth = lineGraphData?.filter((itm) =>
+          moment(itm?.date, "YY/MM/DD").isBetween(
+            moment().subtract(3, "months").startOf("month").subtract(1, "days"),
+            moment().subtract(3, "months").endOf("month")
+          )
+        );
+        const fiveMonth = lineGraphData?.filter((itm) =>
+          moment(itm?.date, "YY/MM/DD").isBetween(
+            moment().subtract(4, "months").startOf("month").subtract(1, "days"),
+            moment().subtract(4, "months").endOf("month")
+          )
+        );
+        const sixMonth = lineGraphData?.filter((itm) =>
+          moment(itm?.date, "YY/MM/DD").isBetween(
+            moment().subtract(5, "months").startOf("month").subtract(1, "days"),
+            moment().subtract(5, "months").endOf("month")
+          )
+        );
+        const sevenMonth = lineGraphData?.filter((itm) =>
+          moment(itm?.date, "YY/MM/DD").isBetween(
+            moment().subtract(6, "months").startOf("month").subtract(1, "days"),
+            moment().subtract(6, "months").endOf("month")
+          )
+        );
+        const eightMonth = lineGraphData?.filter((itm) =>
+          moment(itm?.date, "YY/MM/DD").isBetween(
+            moment().subtract(7, "months").startOf("month").subtract(1, "days"),
+            moment().subtract(7, "months").endOf("month")
+          )
+        );
+        const nineMonth = lineGraphData?.filter((itm) =>
+          moment(itm?.date, "YY/MM/DD").isBetween(
+            moment().subtract(8, "months").startOf("month").subtract(1, "days"),
+            moment().subtract(8, "months").endOf("month")
+          )
+        );
+        let balanceOneMonth = 0;
+        let balanceTwoMonth = 0;
+        let balanceThreeMonth = 0;
+        let balanceFourMonth = 0;
+        let balanceFiveMonth = 0;
+        let balanceSixMonth = 0;
+        let balanceSevenMonth = 0;
+        let balanceEightMonth = 0;
+        let balanceNineMonth = 0;
+        oneMonth?.forEach((itm) => (balanceOneMonth += itm?.balance));
+        twoMonth?.forEach((itm) => (balanceTwoMonth += itm?.balance));
+        threeMonth?.forEach((itm) => (balanceThreeMonth += itm?.balance));
+        fourMonth?.forEach((itm) => (balanceFourMonth += itm?.balance));
+        fiveMonth?.forEach((itm) => (balanceFiveMonth += itm?.balance));
+        sixMonth?.forEach((itm) => (balanceSixMonth += itm?.balance));
+        sevenMonth?.forEach((itm) => (balanceSevenMonth += itm?.balance));
+        eightMonth?.forEach((itm) => (balanceEightMonth += itm?.balance));
+        nineMonth?.forEach((itm) => (balanceNineMonth += itm?.balance));
+        graphDataFormat[0].balance = balanceNineMonth;
+        graphDataFormat[1].balance = balanceEightMonth;
+        graphDataFormat[2].balance = balanceSevenMonth;
+        graphDataFormat[3].balance = balanceSixMonth;
+        graphDataFormat[4].balance = balanceFiveMonth;
+        graphDataFormat[5].balance = balanceFourMonth;
+        graphDataFormat[6].balance = balanceThreeMonth;
+        graphDataFormat[7].balance = balanceTwoMonth;
+        graphDataFormat[8].balance = balanceOneMonth;
+        setGraphData(graphDataFormat);
+        setXAxisValues([1, 2, 3, 4, 5, 6, 7, 8, 9]);
+        setNewXDomain([1, 9]);
+      } else if (duration === 10) {
+        const graphDataFormat = [
+          { date: 1 },
+          { date: 2 },
+          { date: 3 },
+          { date: 4 },
+          { date: 5 },
+          { date: 6 },
+          { date: 7 },
+          { date: 8 },
+          { date: 9 },
+          { date: 10 },
+        ];
+        const oneMonth = lineGraphData?.filter((itm) =>
+          moment(itm?.date, "YY/MM/DD").isBetween(
+            moment().startOf("month").subtract(1, "days"),
+            moment().endOf("month")
+          )
+        );
+        const twoMonth = lineGraphData?.filter((itm) =>
+          moment(itm?.date, "YY/MM/DD").isBetween(
+            moment().subtract(1, "months").startOf("month").subtract(1, "days"),
+            moment().subtract(1, "months").endOf("month")
+          )
+        );
+        const threeMonth = lineGraphData?.filter((itm) =>
+          moment(itm?.date, "YY/MM/DD").isBetween(
+            moment().subtract(2, "months").startOf("month").subtract(1, "days"),
+            moment().subtract(2, "months").endOf("month")
+          )
+        );
+        const fourMonth = lineGraphData?.filter((itm) =>
+          moment(itm?.date, "YY/MM/DD").isBetween(
+            moment().subtract(3, "months").startOf("month").subtract(1, "days"),
+            moment().subtract(3, "months").endOf("month")
+          )
+        );
+        const fiveMonth = lineGraphData?.filter((itm) =>
+          moment(itm?.date, "YY/MM/DD").isBetween(
+            moment().subtract(4, "months").startOf("month").subtract(1, "days"),
+            moment().subtract(4, "months").endOf("month")
+          )
+        );
+        const sixMonth = lineGraphData?.filter((itm) =>
+          moment(itm?.date, "YY/MM/DD").isBetween(
+            moment().subtract(5, "months").startOf("month").subtract(1, "days"),
+            moment().subtract(5, "months").endOf("month")
+          )
+        );
+        const sevenMonth = lineGraphData?.filter((itm) =>
+          moment(itm?.date, "YY/MM/DD").isBetween(
+            moment().subtract(6, "months").startOf("month").subtract(1, "days"),
+            moment().subtract(6, "months").endOf("month")
+          )
+        );
+        const eightMonth = lineGraphData?.filter((itm) =>
+          moment(itm?.date, "YY/MM/DD").isBetween(
+            moment().subtract(7, "months").startOf("month").subtract(1, "days"),
+            moment().subtract(7, "months").endOf("month")
+          )
+        );
+        const nineMonth = lineGraphData?.filter((itm) =>
+          moment(itm?.date, "YY/MM/DD").isBetween(
+            moment().subtract(8, "months").startOf("month").subtract(1, "days"),
+            moment().subtract(8, "months").endOf("month")
+          )
+        );
+        const tenMonth = lineGraphData?.filter((itm) =>
+          moment(itm?.date, "YY/MM/DD").isBetween(
+            moment().subtract(9, "months").startOf("month").subtract(1, "days"),
+            moment().subtract(9, "months").endOf("month")
+          )
+        );
+        let balanceOneMonth = 0;
+        let balanceTwoMonth = 0;
+        let balanceThreeMonth = 0;
+        let balanceFourMonth = 0;
+        let balanceFiveMonth = 0;
+        let balanceSixMonth = 0;
+        let balanceSevenMonth = 0;
+        let balanceEightMonth = 0;
+        let balanceNineMonth = 0;
+        let balanceTenMonth = 0;
+        oneMonth?.forEach((itm) => (balanceOneMonth += itm?.balance));
+        twoMonth?.forEach((itm) => (balanceTwoMonth += itm?.balance));
+        threeMonth?.forEach((itm) => (balanceThreeMonth += itm?.balance));
+        fourMonth?.forEach((itm) => (balanceFourMonth += itm?.balance));
+        fiveMonth?.forEach((itm) => (balanceFiveMonth += itm?.balance));
+        sixMonth?.forEach((itm) => (balanceSixMonth += itm?.balance));
+        sevenMonth?.forEach((itm) => (balanceSevenMonth += itm?.balance));
+        eightMonth?.forEach((itm) => (balanceEightMonth += itm?.balance));
+        nineMonth?.forEach((itm) => (balanceNineMonth += itm?.balance));
+        tenMonth?.forEach((itm) => (balanceTenMonth += itm?.balance));
+        graphDataFormat[0].balance = balanceTenMonth;
+        graphDataFormat[1].balance = balanceNineMonth;
+        graphDataFormat[2].balance = balanceEightMonth;
+        graphDataFormat[3].balance = balanceSevenMonth;
+        graphDataFormat[4].balance = balanceSixMonth;
+        graphDataFormat[5].balance = balanceFiveMonth;
+        graphDataFormat[6].balance = balanceFourMonth;
+        graphDataFormat[7].balance = balanceThreeMonth;
+        graphDataFormat[8].balance = balanceTwoMonth;
+        graphDataFormat[9].balance = balanceOneMonth;
+        setGraphData(graphDataFormat);
+        setXAxisValues([1, 2, 3, 4, 5, 6, 7, 8, 9, 10]);
+        setNewXDomain([1, 10]);
+      } else if (duration === 11) {
+        const graphDataFormat = [
+          { date: 1 },
+          { date: 2 },
+          { date: 3 },
+          { date: 4 },
+          { date: 5 },
+          { date: 6 },
+          { date: 7 },
+          { date: 8 },
+          { date: 9 },
+          { date: 10 },
+          { date: 11 },
+        ];
+        const oneMonth = lineGraphData?.filter((itm) =>
+          moment(itm?.date, "YY/MM/DD").isBetween(
+            moment().startOf("month").subtract(1, "days"),
+            moment().endOf("month")
+          )
+        );
+        const twoMonth = lineGraphData?.filter((itm) =>
+          moment(itm?.date, "YY/MM/DD").isBetween(
+            moment().subtract(1, "months").startOf("month").subtract(1, "days"),
+            moment().subtract(1, "months").endOf("month")
+          )
+        );
+        const threeMonth = lineGraphData?.filter((itm) =>
+          moment(itm?.date, "YY/MM/DD").isBetween(
+            moment().subtract(2, "months").startOf("month").subtract(1, "days"),
+            moment().subtract(2, "months").endOf("month")
+          )
+        );
+        const fourMonth = lineGraphData?.filter((itm) =>
+          moment(itm?.date, "YY/MM/DD").isBetween(
+            moment().subtract(3, "months").startOf("month").subtract(1, "days"),
+            moment().subtract(3, "months").endOf("month")
+          )
+        );
+        const fiveMonth = lineGraphData?.filter((itm) =>
+          moment(itm?.date, "YY/MM/DD").isBetween(
+            moment().subtract(4, "months").startOf("month").subtract(1, "days"),
+            moment().subtract(4, "months").endOf("month")
+          )
+        );
+        const sixMonth = lineGraphData?.filter((itm) =>
+          moment(itm?.date, "YY/MM/DD").isBetween(
+            moment().subtract(5, "months").startOf("month").subtract(1, "days"),
+            moment().subtract(5, "months").endOf("month")
+          )
+        );
+        const sevenMonth = lineGraphData?.filter((itm) =>
+          moment(itm?.date, "YY/MM/DD").isBetween(
+            moment().subtract(6, "months").startOf("month").subtract(1, "days"),
+            moment().subtract(6, "months").endOf("month")
+          )
+        );
+        const eightMonth = lineGraphData?.filter((itm) =>
+          moment(itm?.date, "YY/MM/DD").isBetween(
+            moment().subtract(7, "months").startOf("month").subtract(1, "days"),
+            moment().subtract(7, "months").endOf("month")
+          )
+        );
+        const nineMonth = lineGraphData?.filter((itm) =>
+          moment(itm?.date, "YY/MM/DD").isBetween(
+            moment().subtract(8, "months").startOf("month").subtract(1, "days"),
+            moment().subtract(8, "months").endOf("month")
+          )
+        );
+        const tenMonth = lineGraphData?.filter((itm) =>
+          moment(itm?.date, "YY/MM/DD").isBetween(
+            moment().subtract(9, "months").startOf("month").subtract(1, "days"),
+            moment().subtract(9, "months").endOf("month")
+          )
+        );
+        const elevenMonth = lineGraphData?.filter((itm) =>
+          moment(itm?.date, "YY/MM/DD").isBetween(
+            moment()
+              .subtract(10, "months")
+              .startOf("month")
+              .subtract(1, "days"),
+            moment().subtract(10, "months").endOf("month")
+          )
+        );
+        let balanceOneMonth = 0;
+        let balanceTwoMonth = 0;
+        let balanceThreeMonth = 0;
+        let balanceFourMonth = 0;
+        let balanceFiveMonth = 0;
+        let balanceSixMonth = 0;
+        let balanceSevenMonth = 0;
+        let balanceEightMonth = 0;
+        let balanceNineMonth = 0;
+        let balanceTenMonth = 0;
+        let balanceElevenMonth = 0;
+        oneMonth?.forEach((itm) => (balanceOneMonth += itm?.balance));
+        twoMonth?.forEach((itm) => (balanceTwoMonth += itm?.balance));
+        threeMonth?.forEach((itm) => (balanceThreeMonth += itm?.balance));
+        fourMonth?.forEach((itm) => (balanceFourMonth += itm?.balance));
+        fiveMonth?.forEach((itm) => (balanceFiveMonth += itm?.balance));
+        sixMonth?.forEach((itm) => (balanceSixMonth += itm?.balance));
+        sevenMonth?.forEach((itm) => (balanceSevenMonth += itm?.balance));
+        eightMonth?.forEach((itm) => (balanceEightMonth += itm?.balance));
+        nineMonth?.forEach((itm) => (balanceNineMonth += itm?.balance));
+        tenMonth?.forEach((itm) => (balanceTenMonth += itm?.balance));
+        elevenMonth?.forEach((itm) => (balanceElevenMonth += itm?.balance));
+        graphDataFormat[0].balance = balanceElevenMonth;
+        graphDataFormat[1].balance = balanceTenMonth;
+        graphDataFormat[2].balance = balanceNineMonth;
+        graphDataFormat[3].balance = balanceEightMonth;
+        graphDataFormat[4].balance = balanceSevenMonth;
+        graphDataFormat[5].balance = balanceSixMonth;
+        graphDataFormat[6].balance = balanceFiveMonth;
+        graphDataFormat[7].balance = balanceFourMonth;
+        graphDataFormat[8].balance = balanceThreeMonth;
+        graphDataFormat[9].balance = balanceTwoMonth;
+        graphDataFormat[10].balance = balanceOneMonth;
+        setGraphData(graphDataFormat);
+        setXAxisValues([1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]);
+        setNewXDomain([1, 11]);
+      } else if (duration === 12) {
+        const graphDataFormat = [
+          { date: 1 },
+          { date: 2 },
+          { date: 3 },
+          { date: 4 },
+          { date: 5 },
+          { date: 6 },
+          { date: 7 },
+          { date: 8 },
+          { date: 9 },
+          { date: 10 },
+          { date: 11 },
+          { date: 12 },
+        ];
+        const oneMonth = lineGraphData?.filter((itm) =>
+          moment(itm?.date, "YY/MM/DD").isBetween(
+            moment().startOf("month").subtract(1, "days"),
+            moment().endOf("month")
+          )
+        );
+        const twoMonth = lineGraphData?.filter((itm) =>
+          moment(itm?.date, "YY/MM/DD").isBetween(
+            moment().subtract(1, "months").startOf("month").subtract(1, "days"),
+            moment().subtract(1, "months").endOf("month")
+          )
+        );
+        const threeMonth = lineGraphData?.filter((itm) =>
+          moment(itm?.date, "YY/MM/DD").isBetween(
+            moment().subtract(2, "months").startOf("month").subtract(1, "days"),
+            moment().subtract(2, "months").endOf("month")
+          )
+        );
+        const fourMonth = lineGraphData?.filter((itm) =>
+          moment(itm?.date, "YY/MM/DD").isBetween(
+            moment().subtract(3, "months").startOf("month").subtract(1, "days"),
+            moment().subtract(3, "months").endOf("month")
+          )
+        );
+        const fiveMonth = lineGraphData?.filter((itm) =>
+          moment(itm?.date, "YY/MM/DD").isBetween(
+            moment().subtract(4, "months").startOf("month").subtract(1, "days"),
+            moment().subtract(4, "months").endOf("month")
+          )
+        );
+        const sixMonth = lineGraphData?.filter((itm) =>
+          moment(itm?.date, "YY/MM/DD").isBetween(
+            moment().subtract(5, "months").startOf("month").subtract(1, "days"),
+            moment().subtract(5, "months").endOf("month")
+          )
+        );
+        const sevenMonth = lineGraphData?.filter((itm) =>
+          moment(itm?.date, "YY/MM/DD").isBetween(
+            moment().subtract(6, "months").startOf("month").subtract(1, "days"),
+            moment().subtract(6, "months").endOf("month")
+          )
+        );
+        const eightMonth = lineGraphData?.filter((itm) =>
+          moment(itm?.date, "YY/MM/DD").isBetween(
+            moment().subtract(7, "months").startOf("month").subtract(1, "days"),
+            moment().subtract(7, "months").endOf("month")
+          )
+        );
+        const nineMonth = lineGraphData?.filter((itm) =>
+          moment(itm?.date, "YY/MM/DD").isBetween(
+            moment().subtract(8, "months").startOf("month").subtract(1, "days"),
+            moment().subtract(8, "months").endOf("month")
+          )
+        );
+        const tenMonth = lineGraphData?.filter((itm) =>
+          moment(itm?.date, "YY/MM/DD").isBetween(
+            moment().subtract(9, "months").startOf("month").subtract(1, "days"),
+            moment().subtract(9, "months").endOf("month")
+          )
+        );
+        const elevenMonth = lineGraphData?.filter((itm) =>
+          moment(itm?.date, "YY/MM/DD").isBetween(
+            moment()
+              .subtract(10, "months")
+              .startOf("month")
+              .subtract(1, "days"),
+            moment().subtract(10, "months").endOf("month")
+          )
+        );
+        const twelveMonth = lineGraphData?.filter((itm) =>
+          moment(itm?.date, "YY/MM/DD").isBetween(
+            moment()
+              .subtract(11, "months")
+              .startOf("month")
+              .subtract(1, "days"),
+            moment().subtract(11, "months").endOf("month")
+          )
+        );
+        let balanceOneMonth = 0;
+        let balanceTwoMonth = 0;
+        let balanceThreeMonth = 0;
+        let balanceFourMonth = 0;
+        let balanceFiveMonth = 0;
+        let balanceSixMonth = 0;
+        let balanceSevenMonth = 0;
+        let balanceEightMonth = 0;
+        let balanceNineMonth = 0;
+        let balanceTenMonth = 0;
+        let balanceElevenMonth = 0;
+        let balanceTwelveMonth = 0;
+        oneMonth?.forEach((itm) => (balanceOneMonth += itm?.balance));
+        twoMonth?.forEach((itm) => (balanceTwoMonth += itm?.balance));
+        threeMonth?.forEach((itm) => (balanceThreeMonth += itm?.balance));
+        fourMonth?.forEach((itm) => (balanceFourMonth += itm?.balance));
+        fiveMonth?.forEach((itm) => (balanceFiveMonth += itm?.balance));
+        sixMonth?.forEach((itm) => (balanceSixMonth += itm?.balance));
+        sevenMonth?.forEach((itm) => (balanceSevenMonth += itm?.balance));
+        eightMonth?.forEach((itm) => (balanceEightMonth += itm?.balance));
+        nineMonth?.forEach((itm) => (balanceNineMonth += itm?.balance));
+        tenMonth?.forEach((itm) => (balanceTenMonth += itm?.balance));
+        elevenMonth?.forEach((itm) => (balanceElevenMonth += itm?.balance));
+        twelveMonth?.forEach((itm) => (balanceTwelveMonth += itm?.balance));
+        graphDataFormat[0].balance = balanceTwelveMonth;
+        graphDataFormat[1].balance = balanceElevenMonth;
+        graphDataFormat[2].balance = balanceTenMonth;
+        graphDataFormat[3].balance = balanceNineMonth;
+        graphDataFormat[4].balance = balanceEightMonth;
+        graphDataFormat[5].balance = balanceSevenMonth;
+        graphDataFormat[6].balance = balanceSixMonth;
+        graphDataFormat[7].balance = balanceFiveMonth;
+        graphDataFormat[8].balance = balanceFourMonth;
+        graphDataFormat[9].balance = balanceThreeMonth;
+        graphDataFormat[10].balance = balanceTwoMonth;
+        graphDataFormat[11].balance = balanceOneMonth;
+        setGraphData(graphDataFormat);
+        setXAxisValues([1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]);
+        setNewXDomain([1, 12]);
+      }
+    }
+  }, [
+    selectedDuration,
+    budgetDashboard?.data?.income?.totalIncomeAmount,
+    budgetDashboard?.data?.expense?.totalExpenseAmount,
+    isIncExpGraph,
+    incExpGraphDuration,
+  ]);
+
+  const checkPeriods = (period: any) => {
+    let previousMonths = [];
+    switch (period) {
+      case "THY":
+        let currentMonth: any = moment().format("MM");
+        currentMonth = Number(currentMonth) - 1;
+        for (let i = currentMonth; i >= 0; i--) {
+          previousMonths.push(moment().subtract(i, "months").format("MMM"));
+        }
+        break;
+      case "THM":
+        previousMonths.push(moment().format("MMM"));
+        break;
+      case "LSM":
+        for (let i = 1; i > 0; i--) {
+          previousMonths.push(moment().subtract(i, "months").format("MMM"));
+        }
+        break;
+      case "L3M":
+        for (let i = 2; i >= 0; i--) {
+          previousMonths.push(moment().subtract(i, "months").format("MMM"));
+        }
+        break;
+      case "L6M":
+        for (let i = 5; i >= 0; i--) {
+          previousMonths.push(moment().subtract(i, "months").format("MMM"));
+        }
+        break;
+      case "12M":
+        for (let i = 11; i >= 0; i--) {
+          previousMonths.push(moment().subtract(i, "months").format("MMM"));
+        }
+        break;
+    }
+    return previousMonths;
+  };
+
+  const period = [
+    {
+      label: t("thisMonth"),
+      value: "THM",
+      period: checkPeriods("THM"),
+      endDate: moment().format("YYYY-MM-DD"),
+      startDate: moment().subtract(1, "months").format("YYYY-MM-DD"),
+    },
+    {
+      label: t("lstMon"),
+      value: "LSM",
+      period: checkPeriods("LSM"),
+      endDate: moment().subtract(1, "months").format("YYYY-MM-DD"),
+      startDate: moment().subtract(2, "months").format("YYYY-MM-DD"),
+    },
+    {
+      label: t("lst3Mon"),
+      value: "L3M",
+      period: checkPeriods("L3M"),
+      endDate: moment().subtract(1, "months").format("YYYY-MM-DD"),
+      startDate: moment().subtract(3, "months").format("YYYY-MM-DD"),
+    },
+    {
+      label: t("lst6Mon"),
+      value: "L6M",
+      period: checkPeriods("L6M"),
+      endDate: moment().subtract(1, "months").format("YYYY-MM-DD"),
+      startDate: moment().subtract(6, "months").format("YYYY-MM-DD"),
+    },
+    {
+      label: t("thisYear"),
+      value: "THY",
+      period: checkPeriods("THY"),
+      endDate: moment().format("YYYY-MM-DD"),
+      startDate: moment().month(0).format("YYYY-MM-DD"),
+    },
+    {
+      label: t("last12months"),
+      value: "12M",
+      period: checkPeriods("12M"),
+      endDate: moment().subtract(1, "months").format("YYYY-MM-DD"),
+      startDate: moment().subtract(11, "months").format("YYYY-MM-DD"),
+    },
+  ];
+
+  const end = moment();
+  const start = moment().subtract(11, "months");
+  const dates = Array.from({ length: end.diff(start, "days") + 1 }, (_, i) =>
+    start.clone().add(i, "days")
+  );
+  const duration = Object.values(
+    dates.reduce((acc: any, date: any) => {
+      const month = moment(date).format("MMM");
+      const year = moment(date).format("YYYY");
+      const key = `${month}-${year}`;
+      if (!acc[key]) {
+        acc[key] = { month, year };
+      }
+      return acc;
+    }, {})
+  );
+
+  return (
+    <div className="container whitePanel lg_container">
+      <div className="pl-25">
+        <div className="isFlex spacing alignCenter pt-3">
+          <div className="isModuleTitle">
+            <h1 className="title">{t("allBudgets")}</h1>
+          </div>
+          <div className="isFlex alignCenter">
+            <Select
+              className="selectOptionFont"
+              isSearchable={false}
+              value={selectedOption}
+              options={period}
+              styles={SelectStyle}
+              onChange={(selectedOption: any) => {
+                setSelectedOption(selectedOption);
+                setIsPeriod(selectedOption.period);
+                dispatch({
+                  type: ActionTypesFactory("EFM", "BUDGET_DASHBOARD").REQUEST,
+                  payload: {
+                    userId: user._id,
+                    companyId: user.fk_company_id?.[0],
+                    startDate: selectedOption?.startDate,
+                    endDate: selectedOption?.endDate,
+                    timeline: selectedOption?.value,
+                  },
+                });
+                setIsCategAside(false);
+                setIsCategAsideOpen("");
+                setSelectedDuration(selectedOption?.value);
+                setIsIncExpGraph(true);
+                setIncExpGraphDuration(selectedOption?.value);
+                setDurationDate({
+                  startDate: selectedOption?.startDate,
+                  endDate: selectedOption?.endDate,
+                  timeline: selectedOption?.value,
+                });
+              }}
+              placeholder={t("selectPeriod")}
+            />
+            <button
+              className="createBtn createBtnRole btn ml-3"
+              onClick={() => setIsOpenPopup(true)}
+            >
+              {t("addBudget")}
+            </button>
+          </div>
+        </div>
+        <SliderPopup
+          open={isOpenPopup}
+          closeOnDocumentClick={false}
+          closeOnEscape={false}
+          width={520}
+          lockScroll={true}
+        >
+          <AddBudget
+            setIsOpenPopup={setIsOpenPopup}
+            efmloadCategories={efmloadCategories}
+            setFormikRef={setFormikRef}
+            isEdit={isEdit}
+            setIsEdit={setIsEdit}
+            user={user}
+          />
+        </SliderPopup>
+        <div className="overviewMain allBudgetMain mt-4">
+          <aside className="rightColumn">
+            <div className="whiteCard mb-3 budgetCalSection">
+              <h4 className="budget-title">{displayDates(selectedDuration)}</h4>
+              <div className="isFlex alignCenter budgetCal">
+                {isPeriod &&
+                  duration?.map((duration: any) => {
+                    if (isPeriod?.includes(duration?.month)) {
+                      return (
+                        <div className="mt-2">
+                          <div className="budgetMonth mb-1 budgetActiveM">
+                            <span>{duration?.month}</span>
+                          </div>
+                          <span className="softBlueColor">
+                            {duration?.year}
+                          </span>
+                        </div>
+                      );
+                    } else {
+                      return (
+                        <div className="mt-2">
+                          <div className="budgetMonth mb-1">
+                            <span>{duration?.month}</span>
+                          </div>
+                          <span>{duration?.year}</span>
+                        </div>
+                      );
+                    }
+                  })}
+              </div>
+            </div>
+
+            <div className="whiteCard mb-3 incomeSection">
+              <h6 className="isFlex alignCenter borderBottom pb-2">
+                {t("netCredits")}{" "}
+                <span className="pl-1">
+                {budgetDashboard?.data?.income?.currency}{" "}
+                  {budgetDashboard?.data?.income?.totalIncomeAmount < 10000
+                    ? currencyFormatter.format(
+                        budgetDashboard?.data?.income?.totalIncomeAmount,
+                        { code: "" }
+                      )
+                    : millify(
+                        budgetDashboard?.data?.income?.totalIncomeAmount,
+                        true
+                      )}
+                </span>
+                <span className="incomeRec">
+                  <em className="icon-up-arrow"></em>
+                </span>
+              </h6>
+              {Array(1)
+                .fill("")
+                .map(() => (
+                  <div
+                    className="mt-3 expenseSection"
+                    onClick={() => {
+                      if (isCategAsideOpen === "expense") {
+                        setCategAsideLabels({
+                          category: "Public Transportation",
+                          budgetFreqency: "Every month",
+                          currency: "SAR",
+                          amount: "9000",
+                          description: "testing2",
+                        });
+                        dispatch({
+                          type: ActionTypesFactory("EFM", "BUDGET_DASHBOARD")
+                            .REQUEST,
+                          payload: {
+                            userId: user._id,
+                            companyId: user.fk_company_id?.[0],
+                            startDate: durationDate?.startDate,
+                            endDate: durationDate?.endDate,
+                            timeline: durationDate?.timeline,
+                          },
+                        });
+                        setIsCategAsideOpen("income");
+                        setIsIncomeGraph(true);
+                        setIsIncExpGraph(false);
+                      } else if (isCategAsideOpen === "") {
+                        setCategAsideLabels({
+                          category: "Public Transportation",
+                          budgetFreqency: "Every month",
+                          currency: "SAR",
+                          amount: "9000",
+                          description: "testing2",
+                        });
+                        dispatch({
+                          type: ActionTypesFactory("EFM", "BUDGET_DASHBOARD")
+                            .REQUEST,
+                          payload: {
+                            userId: user._id,
+                            companyId: user.fk_company_id?.[0],
+                            startDate: durationDate?.startDate,
+                            endDate: durationDate?.endDate,
+                            timeline: durationDate?.timeline,
+                          },
+                        });
+                        setIsIncomeGraph(true);
+                        setIsCategAsideOpen("income");
+                        setIsCategAside(true);
+                        setIsIncExpGraph(false);
+                      } else {
+                        setIsCategAside(false);
+                        setIsCategAsideOpen("");
+                        setIsIncExpGraph(true);
+                        setIncExpGraphDuration(selectedDuration);
+                      }
+                    }}
+                  >
+                    <div className="w-96">
+                      <div className="isFlex alignCenter spacing font-Heavy">
+                        <span className="fs-14">
+                          <span className="accessColor">Auto & Transport:</span>{" "}
+                          Gas & Fuel
+                        </span>
+                        <span className="fs-12 mediumTextColor">
+                          SAR 5,50,000 Left
+                        </span>
+                      </div>
+                      <div className="isProgressBg">
+                        <div
+                          className="isProgressStatus"
+                          style={{ width: "12%" }}
+                        ></div>
+                      </div>
+                      <span className="fs-12 font-Heavy">
+                        SAR 10,000{" "}
+                        <span className="accessColor">of SAR 6,00,000</span>
+                      </span>
+                    </div>
+                    {/* <div className="actionSection">
+                  <div className="icon-dots Cursor" ref={toolTipRef} onClick={() => setShowTooltip(!showTooltip)}></div>
+                  {showTooltip &&
+                    <div className="transcationTooltip">
+                      <div className="bottom">
+                        <ul>
+                          <li onClick={() => {
+                            setIsOpenPopup(true);
+                            setIsEdit(true);
+                            setCategAsideLabels({
+                              category: "Public Transportation",
+                              budgetFreqency: "Every month",
+                              currency: "SAR",
+                              amount: "9000",
+                              description: "testing2",
+                            });
+                            formikRef?.current?.setFieldValue(`subCategoryId`, "64378fa6a9c52f5539a64797");
+                            // formikRef?.current?.setFieldValue(`subCategoryId`, categAsideLabels?.subCategoryId);
+                            formikRef?.current?.setFieldValue(`frequencyType`, categAsideLabels?.budgetFreqency);
+                            formikRef?.current?.setFieldValue(`frequencyDate`, "");
+                            formikRef?.current?.setFieldValue(`amount`, categAsideLabels?.amount);
+                            formikRef?.current?.setFieldValue(`description`, categAsideLabels?.description);
+                          }}>
+                            <span className="icon-New-edit" ></span>
+                            {t("edit")}
+                          </li>
+                          <li>
+                            <span className="icon-fill-delete"></span>
+                            {t("delete")}
+                          </li>
+                        </ul>
+                      </div>
+                    </div>
+                  }
+                </div> */}
+                  </div>
+                ))}
+              {/* {budgetDashboard?.data?.income?.incomeCategoryData?.sort((a, b) => b?.percentage - a?.percentage)?.slice(0, 5)?.map((key: any) => (
+              <div className="mt-3" onClick={() => {
+                      if(isCategAsideOpen === "expense") {
+                setCategAsideLabels({
+                  category: key?.categoryName,
+                  subCategoryName: key?.subCategoryName
+                  subCategoryNameAR: key?.subCategoryNameAR
+                  budgetFreqency: key?.budgetData?.frequencyType,
+                  currency: key?.budgetData?.currency,
+                  spendAmount: key?.totalCurrentAmt,
+                  budgetAmount: key?.budgetData?.totalBudgetAmt,
+                  description: key?.budgetData?.description,
+                  subCategoryId: key?.budgetData?.subCategoryId,
+                });
+                    dispatch({
+                  type: ActionTypesFactory("EFM", "BUDGET_DASHBOARD").REQUEST,
+                  payload: {
+                   userId: user._id,
+                    companyId: user.fk_company_id?.[0],
+                    startDate: durationDate?.startDate,
+                    endDate: durationDate?.endDate,
+                    timeline: durationDate?.timeline
+                  },
+                });
+                setIsBudgetData(key?.budgetData)
+                setIsIncomeGraph(true);
+                setIsCategAsideOpen("income");
+                setIsIncExpGraph(false);
+              } else if(isCategAsideOpen === "")
+              {
+                setCategAsideLabels({
+                  category: key?.categoryName,
+                  subCategoryName: key?.subCategoryName
+                  subCategoryNameAR: key?.subCategoryNameAR
+                  budgetFreqency: key?.budgetData?.frequencyType,
+                  currency: key?.budgetData?.currency,
+                  spendAmount: key?.totalCurrentAmt,
+                  budgetAmount: key?.budgetData?.totalBudgetAmt,
+                  description: key?.budgetData?.description,
+                  subCategoryId: key?.budgetData?.subCategoryId,
+                });
+                        dispatch({
+                  type: ActionTypesFactory("EFM", "BUDGET_DASHBOARD").REQUEST,
+                  payload: {
+                   userId: user._id,
+                    companyId: user.fk_company_id?.[0],
+                    startDate: durationDate?.startDate,
+                    endDate: durationDate?.endDate,
+                    timeline: durationDate?.timeline
+                  },
+                });
+                setIsBudgetData(key?.budgetData)
+                setIsIncomeGraph(true);
+                setIsCategAsideOpen("income");
+                setIsCategAside(true);
+                setIsIncExpGraph(false);
+              }              
+             else {
+               setIsCategAside(false);
+               setIsCategAsideOpen("");
+               setIsIncExpGraph(true);
+               setIncExpGraphDuration(selectedDuration);
+              }}}>
+                <div className="isFlex alignCenter spacing font-Heavy">
+                  <span className="fs-14">
+                    <span className="accessColor">{key?.categoryName}</span>
+                    {i18n.language === "en"? key?.subCategoryName : key?.subCategoryNameAR}
+                  </span>
+                  <span className="fs-12 mediumTextColor">
+                    {key?.totalPreviousAmt} Left
+                  </span>
+                </div>
+                <div className="isProgressBg">
+                  <div
+                    className="isProgressStatus"
+                    style={{ width: key?.isAboveLimit ? "100%" : key?.percentage }}
+                  ></div>
+                </div>
+                <span className="fs-12 font-Heavy">
+                  {key?.budgetData?.currency} {key?.totalCurrentAmt}{" "}
+                  <span className="accessColor">of {key?.budgetData?.currency} {key?.budgetData?.totalBudgetAmt}</span>
+                </span>
+              </div>
+            ))} */}
+            </div>
+
+            <div className="whiteCard mb-3 incomeSection">
+              <h6 className="isFlex alignCenter borderBottom pb-2">
+                {t("netDebits")}{" "}
+                <span className="pl-1">
+                {budgetDashboard?.data?.expense?.currency}{" "}
+                  {budgetDashboard?.data?.expense?.totalExpenseAmount < 10000
+                    ? currencyFormatter.format(
+                        budgetDashboard?.data?.expense?.totalExpenseAmount,
+                        { code: "" }
+                      )
+                    : millify(
+                        budgetDashboard?.data?.expense?.totalExpenseAmount,
+                        true
+                      )}{" "}
+                </span>
+                <span className="incomeRec expenseRec">
+                  <em className="icon-up-arrow"></em>
+                </span>
+              </h6>
+
+              {Array(2)
+                .fill("")
+                .map((_, index) => (
+                  <div
+                    className="mt-3 expenseSection"
+                    onClick={() => {
+                      if (isCategAsideOpen === "income") {
+                        setCategAsideLabels({
+                          category: "Public Transportation",
+                          budgetFreqency: "Every month",
+                          currency: "SAR",
+                          amount: "8000",
+                          description: "testing",
+                        });
+                        dispatch({
+                          type: ActionTypesFactory("EFM", "BUDGET_DASHBOARD")
+                            .REQUEST,
+                          payload: {
+                            userId: user._id,
+                            companyId: user.fk_company_id?.[0],
+                            startDate: durationDate?.startDate,
+                            endDate: durationDate?.endDate,
+                            timeline: durationDate?.timeline,
+                          },
+                        });
+                        setIsIncomeGraph(false);
+                        setIsCategAsideOpen("expense");
+                        setIsIncExpGraph(false);
+                      } else if (isCategAsideOpen === "") {
+                        setCategAsideLabels({
+                          category: "Public Transportation",
+                          budgetFreqency: "Every month",
+                          currency: "SAR",
+                          amount: "8000",
+                          description: "testing",
+                        });
+                        dispatch({
+                          type: ActionTypesFactory("EFM", "BUDGET_DASHBOARD")
+                            .REQUEST,
+                          payload: {
+                            userId: user._id,
+                            companyId: user.fk_company_id?.[0],
+                            startDate: durationDate?.startDate,
+                            endDate: durationDate?.endDate,
+                            timeline: durationDate?.timeline,
+                          },
+                        });
+                        setIsIncomeGraph(false);
+                        setIsCategAsideOpen("expense");
+                        setIsCategAside(true);
+                        setIsIncExpGraph(false);
+                      } else {
+                        setIsCategAside(false);
+                        setIsCategAsideOpen("");
+                        setIsIncExpGraph(true);
+                        setIncExpGraphDuration(selectedDuration);
+                      }
+                    }}
+                  >
+                    <div className="w-96">
+                      <div className="isFlex alignCenter spacing font-Heavy">
+                        <span className="fs-14">
+                          <span className="accessColor">Auto & Transport:</span>{" "}
+                          Gas & Fuel
+                        </span>
+                        <span className="fs-12 mediumTextColor">
+                          SAR 5,50,000 Left
+                        </span>
+                      </div>
+                      <div className="isProgressBg">
+                        <div
+                          className="isProgressStatus"
+                          style={{ width: "12%" }}
+                        ></div>
+                      </div>
+                      <span className="fs-12 font-Heavy">
+                        SAR 10,000{" "}
+                        <span className="accessColor">of SAR 6,00,000</span>
+                      </span>
+                    </div>
+                    <div className="actionSection">
+                  <div className="icon-dots Cursor" ref={toolTipRef}onClick={(e) => {
+                      e.stopPropagation();
+                      setShowTooltip({ [index]: !showTooltip?.[index] })}
+                    }></div>
+                  {showTooltip?.[index] &&
+                    <div className="transcationTooltip">
+                      <div className="bottom">
+                        <ul>
+                          <li onClick={() => {
+                            setIsOpenPopup(true);
+                            setIsEdit(true);
+                            setCategAsideLabels({
+                              category: "Public Transportation",
+                              budgetFreqency: "Every month",
+                              currency: "SAR",
+                              amount: "8000",
+                              description: "testing",
+                            })
+                            formikRef?.current?.setFieldValue(`subCategoryId`, "64378fa6a9c52f5539a64797");
+                            // formikRef?.current?.setFieldValue(`subCategoryId`, categAsideLabels?.subCategoryId);
+                            formikRef?.current?.setFieldValue(`frequencyType`, categAsideLabels?.budgetFreqency);
+                            formikRef?.current?.setFieldValue(`frequencyDate`, "");
+                            formikRef?.current?.setFieldValue(`amount`, categAsideLabels?.amount);
+                            formikRef?.current?.setFieldValue(`description`, categAsideLabels?.description);
+                          }}>
+                            <span className="icon-New-edit" ></span>
+                            {t("edit")}
+                          </li>
+                          <li>
+                            <span className="icon-fill-delete"></span>
+                            {t("delete")}
+                          </li>
+                        </ul>
+                      </div>
+                    </div>
+                  }
+                </div>
+                  </div>
+                ))}
+
+              {/* {budgetDashboard?.data?.expense?.expenseCategoryData?.sort((a, b) => b?.percentage - a?.percentage)?.slice(0, 5)?.map((key: any) => (
+              <div className="mt-3 expenseSection" onClick={() => {
+                if(isCategAsideOpen === "income") {
+                setCategAsideLabels({
+                  category: key?.categoryName,
+                  subCategoryName: key?.subCategoryName
+                  subCategoryNameAR: key?.subCategoryNameAR
+                  budgetFreqency: key?.budgetData?.frequencyType,
+                  currency: key?.budgetData?.currency,
+                  spendAmount: key?.totalCurrentAmt,
+                  amount: key?.budgetData?.totalBudgetAmt,
+                  description: key?.budgetData?.description,
+                  subCategoryId: key?.budgetData?.subCategoryId,
+                });
+                        dispatch({
+                  type: ActionTypesFactory("EFM", "BUDGET_DASHBOARD").REQUEST,
+                  payload: {
+                   userId: user._id,
+                    companyId: user.fk_company_id?.[0],
+                    startDate: durationDate?.startDate,
+                    endDate: durationDate?.endDate,
+                    timeline: durationDate?.timeline
+                  },
+                });
+                setIsBudgetData(key?.budgetData)
+                setIsIncomeGraph(false);
+                setIsCategAsideOpen("expense");
+                setIsIncExpGraph(false);
+              } else if(isCategAsideOpen === "")
+              {
+                setCategAsideLabels({
+                  category: key?.categoryName,
+                  subCategoryName: key?.subCategoryName
+                  subCategoryNameAR: key?.subCategoryNameAR
+                  budgetFreqency: key?.budgetData?.frequencyType,
+                  currency: key?.budgetData?.currency,
+                  spendAmount: key?.totalCurrentAmt,
+                  amount: key?.budgetData?.totalBudgetAmt,
+                  description: key?.budgetData?.description,
+                  subCategoryId: key?.budgetData?.subCategoryId,
+                });
+                        dispatch({
+                  type: ActionTypesFactory("EFM", "BUDGET_DASHBOARD").REQUEST,
+                  payload: {
+                   userId: user._id,
+                    companyId: user.fk_company_id?.[0],
+                    startDate: durationDate?.startDate,
+                    endDate: durationDate?.endDate,
+                    timeline: durationDate?.timeline
+                  },
+                });
+                setIsBudgetData(key?.budgetData)
+                setIsIncomeGraph(false);
+                setIsCategAsideOpen("expense");
+                setIsCategAside(true);
+                setIsIncExpGraph(false);
+              }              
+             else {
+               setIsCategAside(false);
+               setIsCategAsideOpen("");
+               setIsIncExpGraph(true);
+               setIncExpGraphDuration(selectedDuration);
+               }}}>
+                <div className="w-96">
+                  <div className="isFlex alignCenter spacing font-Heavy">
+                    <span className="fs-14">
+                      <span className="accessColor">{key?.categoryName}</span>
+                      {i18n.language === "en"? key?.subCategoryName : key?.subCategoryNameAR}
+                    </span>
+                    <span className="fs-12 mediumTextColor">
+                    {key?.totalPreviousAmt} Left
+                    </span>
+                  </div>
+                  <div className="isProgressBg">
+                    <div
+                      className="isProgressStatus"
+                      style={{ width: key?.isAboveLimit ? "100%" : key?.percentage }}
+                    ></div>
+                  </div>
+                  <span className="fs-12 font-Heavy">
+                  {key?.budgetData?.currency} {key?.totalCurrentAmt}{" "}
+                    <span className="accessColor">of {key?.budgetData?.currency} {key?.budgetData?.totalBudgetAmt}</span>
+                  </span>
+                </div>
+                <div className="actionSection">
+                  <div className="icon-dots Cursor" ref={toolTipRef} onClick={(e) => {
+                      e.stopPropagation();
+                      setShowTooltip({ [key?.budgetData?.subCategoryId]: !showTooltip?.[key?.budgetData?.subCategoryId] })}
+                    }></div>
+                  {showTooltip?.[key?.budgetData?.subCategoryId] &&
+                    <div className="transcationTooltip">
+                      <div className="bottom">
+                        <ul>
+                          <li onClick={() => {
+                            setIsOpenPopup(true);
+                            setIsEdit(true);
+                            setCategAsideLabels({
+                              category: key?.categoryName,
+                              subCategoryName: key?.subCategoryName
+                              subCategoryNameAR: key?.subCategoryNameAR
+                              budgetFreqency: key?.budgetData?.frequencyType,
+                              currency: key?.budgetData?.currency,
+                              spendAmount: key?.totalCurrentAmt,
+                              amount: key?.budgetData?.totalBudgetAmt,
+                              description: key?.budgetData?.description,
+                            })
+                            formikRef?.current?.setFieldValue(`subCategoryId`, "64378fa6a9c52f5539a64797");
+                            formikRef?.current?.setFieldValue(`frequencyType`, categAsideLabels?.budgetFreqency);
+                            formikRef?.current?.setFieldValue(`frequencyDate`, "");
+                            formikRef?.current?.setFieldValue(`amount`, categAsideLabels?.amount);
+                            formikRef?.current?.setFieldValue(`description`, categAsideLabels?.description);
+                          }}>
+                            <span className="icon-New-edit" ></span>
+                            {t("edit")}
+                          </li>
+                          <li>
+                            <span className="icon-fill-delete"></span>
+                            {t("delete")}
+                          </li>
+                        </ul>
+                      </div>
+                    </div>
+                  }
+                </div>
+              </div>
+            ))} */}
+
+              <div className="mt-3">
+                <span className="isFlex alignCenter spacing">
+                  <h6>
+                    {t("otherExpenses")}
+                    <span className="pl-1">
+                      {/* {budgetDashboard?.data?.expense?.currency} {budgetDashboard?.data?.expense?.totalExpenseAmount < 10000
+                  ? currencyFormatter.format(
+                      budgetDashboard?.data?.expense?.totalExpenseAmount,
+                      { code: "" }
+                    )
+                  : millify(
+                      budgetDashboard?.data?.expense?.totalExpenseAmount,
+                      true
+                    )} */}
+                      {budgetDashboard?.data?.expense?.currency} 6000
+                    </span>
+                  </h6>
+                  <i
+                    className={`icon-down-arrow downArrow fs-16 ${
+                      isDownArrow ? "toggle" : ""
+                    }`}
+                    onClick={() => setIsDownArrow(!isDownArrow)}
+                  ></i>
+                </span>
+                {
+                  isDownArrow &&
+                    Array(6)
+                      .fill("")
+                      .map(() => (
+                        <div className="mt-2 borderTop pt-2">
+                          <div className="isFlex alignCenter spacing font-Heavy w-96">
+                            <span className="fs-14">
+                              <span className="accessColor">
+                                Auto & Transport:
+                              </span>{" "}
+                              Gas & Fuel
+                            </span>
+                            <span className="fs-12 mediumTextColor">
+                              SAR 10,000
+                            </span>
+                          </div>
+                        </div>
+                      ))
+                  /* {budgetDashboard?.data?.expense?.otherExpenseCategoryData?.sort((a, b) => b?.percentage - a?.percentage)?.slice(5)?.map((key: any) => (
+                <div className="mt-2 borderTop pt-2">
+                  <div className="isFlex alignCenter spacing font-Heavy w-96">
+                    <span className="fs-14">
+                      <span className="accessColor">{key?.categoryName}</span>
+                      {i18n.language === "en"? key?.subCategoryName : key?.subCategoryNameAR}  
+                    </span>
+                    <span className="fs-12 mediumTextColor">{key?.budgetData?.currency} {key?.totalCurrentAmt}</span>
+                  </div>
+                </div>
+              ))} */
+                }
+              </div>
+            </div>
+          </aside>
+          <aside className="leftColumn">
+            <div className="whiteCard categoryList isCashflowSection">
+              {isIncExpGraph ? (
+                <div className="isFlex alignCenter spacing mb-4">
+                  <h5 className="isTitle">{t("analysis")}</h5>
+                  <div className="isFlex alignCenter spacing">
+                    <div className="isFlexColumn isNetCredits">
+                      <span className="accessColor mb-10">
+                        {t("netCredits")}
+                      </span>
+                      <span className="isTotalAmount">
+                        <span className="currency">{budgetDashboard?.data?.income?.currency}</span>
+                        <span className="isValue">
+                          {budgetDashboard?.data?.income?.totalIncomeAmount <
+                          10000
+                            ? currencyFormatter.format(
+                                budgetDashboard?.data?.income
+                                  ?.totalIncomeAmount,
+                                { code: "" }
+                              )
+                            : millify(
+                                budgetDashboard?.data?.income
+                                  ?.totalIncomeAmount,
+                                true
+                              )}
+                        </span>
+                      </span>
+                    </div>
+                    <div className="isFlexColumn ml-4 isExpenses">
+                      <span className="accessColor mb-10">{t("expense")}</span>
+                      <span className="isTotalAmount">
+                        <span className="currency">{budgetDashboard?.data?.expense?.currency}</span>
+                        <span className="isValue">
+                          {budgetDashboard?.data?.expense?.totalExpenseAmount <
+                          10000
+                            ? currencyFormatter.format(
+                                budgetDashboard?.data?.expense
+                                  ?.totalExpenseAmount,
+                                { code: "" }
+                              )
+                            : millify(
+                                budgetDashboard?.data?.expense
+                                  ?.totalExpenseAmount,
+                                true
+                              )}
+                        </span>
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              ) : (
+                <div className="isFlex alignCenter spacing mb-4">
+                  <div>
+                    <h5 className="isTitle">
+                      {categAsideLabels?.category}{" "}
+                      {categAsideLabels?.spendAmount}
+                    </h5>
+                  </div>
+                  <div
+                    className={isIncomeGraph ? "isNetCredits" : "isExpenses"}
+                  >
+                    <span className="accessColor displyBlock mb-10">
+                      {isIncomeGraph ? t("netCredits") : t("expense")}
+                    </span>
+                    <span className="isTotalAmount">
+                      <span className="currency">SAR</span>
+                      <span className="isValue">
+                        {isIncomeGraph
+                          ? budgetDashboard?.data?.income?.totalIncomeAmount <
+                            10000
+                            ? currencyFormatter.format(
+                                budgetDashboard?.data?.income
+                                  ?.totalIncomeAmount,
+                                { code: "" }
+                              )
+                            : millify(
+                                budgetDashboard?.data?.income
+                                  ?.totalIncomeAmount,
+                                true
+                              )
+                          : budgetDashboard?.data?.expense?.totalExpenseAmount <
+                            10000
+                          ? currencyFormatter.format(
+                              budgetDashboard?.data?.expense
+                                ?.totalExpenseAmount,
+                              { code: "" }
+                            )
+                          : millify(
+                              budgetDashboard?.data?.expense
+                                ?.totalExpenseAmount,
+                              true
+                            )}
+                      </span>
+                    </span>
+                  </div>
+                </div>
+              )}
+              {true ? (
+                <>
+                  {" "}
+                  <div className="cashBar">
+                    <BudgetLineChart
+                      selectedDuration={selectedDuration}
+                      xAxisValues={xAxisValues}
+                      newXDomain={newXDomain}
+                      graphData={graphData}
+                      isIncExpGraph={isIncExpGraph}
+                      graphData2={graphData2}
+                      incExpGraphDuration={incExpGraphDuration}
+                      thisYearDuration={thisYearDuration}
+                      isIncomeGraph={isIncomeGraph}
+                      maxDomainIncExpGraph={maxDomainIncExpGraph}
+                    />
+                  </div>
+                  {isCategAside && (
+                    <div className="mt-4">
+                      <div className="mb-2">
+                        <span className="accessColor displyBlock mb-10">
+                          Category
+                        </span>
+                        <strong className="fs-16">
+                          {i18n.language === "en"
+                            ? categAsideLabels?.subCategoryName
+                            : categAsideLabels?.subCategoryNameAR}
+                        </strong>
+                      </div>
+                      <div className="mb-2">
+                        <span className="accessColor displyBlock mb-10">
+                          Budget frequency
+                        </span>
+                        <strong className="fs-16">
+                          {categAsideLabels?.budgetFreqency}
+                        </strong>
+                      </div>
+                      <div className="isFlex alignCenter">
+                        <div className="w-40 mb-2">
+                          <span className="accessColor displyBlock mb-10">
+                            Spend amount
+                          </span>
+                          <strong>
+                            {categAsideLabels?.currency}{" "}
+                            {categAsideLabels?.spendAmount}
+                          </strong>
+                        </div>
+                        <div className="w-40 mb-2">
+                          <span className="accessColor displyBlock mb-10">
+                            Budget amount
+                          </span>
+                          <strong>
+                            {categAsideLabels?.currency}{" "}
+                            {categAsideLabels?.amount}
+                          </strong>
+                        </div>
+                      </div>
+                      <div className="mb-2">
+                        <span className="accessColor displyBlock mb-10">
+                          Description
+                        </span>
+                        <strong>{categAsideLabels?.description}</strong>
+                      </div>
+                      <div className="isFlex alignCenter pt-1">
+                        <Button
+                          className="rejectBtn iconActiveH"
+                          onClick={() => {
+                            setIsOpenPopup(true);
+                            setIsEdit(true);
+                            // formikRef?.current?.setFieldValue(`subCategoryId`, "64378fa6a9c52f5539a64797");
+                            formikRef?.current?.setFieldValue(
+                              `subCategoryId`,
+                              categAsideLabels?.subCategoryId
+                            );
+                            formikRef?.current?.setFieldValue(
+                              `frequencyType`,
+                              categAsideLabels?.budgetFreqency
+                            );
+                            formikRef?.current?.setFieldValue(
+                              `frequencyDate`,
+                              ""
+                            );
+                            formikRef?.current?.setFieldValue(
+                              `amount`,
+                              categAsideLabels?.amount
+                            );
+                            formikRef?.current?.setFieldValue(
+                              `description`,
+                              categAsideLabels?.description
+                            );
+                          }}
+                          icon="icon-Edit"
+                          type="info"
+                        >
+                          {t("edit")}
+                        </Button>
+                        <Button
+                          className="rejectBtn iconActiveH m-0"
+                          icon="icon-no-fill-delete"
+                          type="info"
+                        >
+                          {t("delete")}
+                        </Button>
+                      </div>
+                    </div>
+                  )}
+                </>
+              ) : (
+                <>
+                  {" "}
+                  {/* No Data Found */}
+                  <div className="noRecordFound errormessage mdErrorMsg mb-0">
+                    <img
+                      className="errorimage mt-2 mb-2"
+                      src={"/assets/images/No-transactions-found.png"}
+                      alt="logo"
+                    />
+                    <div className="title">{t("notEnoughData")}</div>
+                    <br />
+                    <span className="payment-text">
+                      {t("analyticsFetchMsg")}
+                    </span>
+                  </div>
+                </>
+              )}
+            </div>
+          </aside>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default AllBudget;
