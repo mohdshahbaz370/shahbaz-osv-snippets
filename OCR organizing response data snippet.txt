@@ -1,0 +1,285 @@
+API response: {
+    "success": true,
+    "data": [
+        {
+            "vendorVatNumber": "310172374300003",
+            "receiverVatNumber": "300533832200003",
+            "paymentTerms": "Net 30 Days from Date of Invoice",
+            "bankAccountNo": "221-298573-001",
+            "IBANNo": "SA0545000000221298573001",
+            "swiftCode": "SABBSARI",
+            "bankName": "Saudi British Bank (SABB)",
+            "invoiceId": "81164544",
+            "email": "asjw",
+            "supplierName": "Tronox Saudi Industries Co.",
+            "receiverName": "AL-JAZEERA FACTORY FOR PAINTS CO.",
+            "PONumber": "13586",
+            "tablesData": [
+                [
+                    "Item",
+                    "10",
+                    "11",
+                    "",
+                    "Total    900,000.00"
+                ],
+                [
+                    "Description",
+                    "TiONA 828 rutile titanium dioxide 40x25kg paper bags per M102BY pallet",
+                    "TiONA 828 rutile titanium dioxide 40x25kg paper bags per M102BY pallet",
+                    "",
+                    "Total    900,000.00"
+                ],
+                [
+                    "Quantity",
+                    "40.000 MT",
+                    "40.000 MT",
+                    "",
+                    "Total    900,000.00"
+                ],
+                [
+                    "Unit Price",
+                    "11,250.00",
+                    "11,250.00",
+                    "",
+                    "Total    900,000.00"
+                ],
+                [
+                    "Amount",
+                    "450,000.00",
+                    "450,000.00",
+                    "",
+                    "Total    900,000.00"
+                ],
+                [
+                    "VAT %",
+                    "15",
+                    "15",
+                    "",
+                    ""
+                ],
+                [
+                    "VAT",
+                    "67,500.00",
+                    "67,500.00",
+                    "",
+                    "135,000.00"
+                ],
+                [
+                    "Total",
+                    "517,500.00",
+                    "517,500.00",
+                    "",
+                    "1,035,000.00"
+                ]
+            ]
+        },
+        {
+            "vendorVatNumber": "9...VTV.9E",
+            "paymentTerms": "Days from Date of Invoice r. Net",
+            "bankAccountNo": "221298573001",
+            "IBANNo": "SA0545000000221298573001",
+            "swiftCode": "SABBSARI",
+            "bankName": "TRONOX",
+            "invoiceId": "11178028",
+            "supplierName": "Tronox Saudi Industries Co.",
+            "receiverName": "Mr. Arjun",
+            "tablesData": [
+                [
+                    "will",
+                    "",
+                    "",
+                    "",
+                    "    "
+                ],
+                [
+                    "Storell , Elwill both",
+                    "wish with AYA Tiona LS1E.X25 pruliui is o us",
+                    "AYA Tiona pruliui",
+                    "",
+                    "    "
+                ],
+                [
+                    "was",
+                    "MT E",
+                    "MT E",
+                    "",
+                    "    "
+                ],
+                [
+                    "our",
+                    "",
+                    "",
+                    "",
+                    "    "
+                ],
+                [
+                    "cheal injust gistrul",
+                    "",
+                    "",
+                    "",
+                    "    "
+                ],
+                [
+                    "",
+                    "10",
+                    "10",
+                    "",
+                    ""
+                ],
+                [
+                    "ilso will",
+                    "",
+                    "",
+                    "",
+                    ""
+                ],
+                [
+                    "Jold) Ejeral legal is",
+                    "",
+                    "",
+                    "",
+                    ""
+                ]
+            ]
+        }
+    ]
+}
+
+
+
+
+
+
+
+
+const invoiceOCRTable = (invoiceOCROptions: any) => {
+    let data = [];
+    OCRData?.data?.forEach((key) => data.push(...key.tablesData));
+    const map = new Map();
+
+    // Define a function to map column names
+    const mapColumnName = (key: any) => {
+      if (findColumnName(["item", "#", "line"], key)) {
+        return "item";
+      } else if (
+        findColumnNameItemDescription(
+          ["description", "item description", "order", "item & description", "material", "item descriptions"],
+          key
+        )
+      ) {
+        return "description";
+      } else if (findColumnName(["quatity", "quantity", "qty", "qty."], key)) {
+        return "quantity";
+      } else if (
+        findColumnName(["rate", "unit price", "unit amount", "unit cost", "price"], key)
+      ) {
+        return "unitPrice";
+      } else if (findColumnName(["vat %", "tax %"], key)) {
+        return "vat";
+      } else if (findColumnName(["total before discount"], key)) {
+        return "totalBeforeDiscount";
+      } else if (findColumnName(["total after discount"], key)) {
+        return "totalAfterDiscount";
+      } else if (findColumnName(["vat amount", "tax amount", "total vat", "value added tax", "vat 15%"], key)) {
+        return "vatAmount";
+      } else if (findColumnName(["discount"], key)) {
+        return "discount";
+      }
+    };
+
+    // Process the data and update the map with mapped column names
+    data?.forEach((d, index) => {
+      const [key, ...values] = d;
+      const mappedKey = mapColumnName(key);
+      if (map.has(mappedKey)) {
+        map.set(mappedKey, [...map.get(mappedKey), ...values]);
+      } else {
+        map.set(mappedKey, [...values]);
+      }
+    });
+
+    let result = new Array([...map.entries()]?.[0]?.[1]?.length)?.fill({});
+
+    [...map.entries()].forEach((data, index) => {
+      let [key, value] = data;
+      result = result.map((res, i) => {
+        return {
+          ...res,
+          [key]: value[i],
+        };
+      });
+    });
+
+    let extractedData = result.map((obj) => ({
+      vat: obj?.["vat"]
+        ? obj?.["vat"]?.replace(/[^0-9.]/g, "")?.split(".")?.[0]
+        : Number.isNaN(
+            (Number(obj?.["vatAmount"]?.replace(/[^0-9.]/g, "")) /
+              Number(obj?.["totalAfterDiscount"]?.replace(/[^0-9.]/g, ""))) *
+              100
+          )
+        ? 0
+        : (
+            (Number(obj?.["vatAmount"]?.replace(/[^0-9.]/g, "")) /
+              Number(obj?.["totalAfterDiscount"]?.replace(/[^0-9.]/g, ""))) *
+            100
+          )
+            ?.toString()
+            ?.split(".")?.[0],
+      unitPrice: obj?.["unitPrice"]?.replace(/[^0-9.]/g, ""),
+      quantity: obj?.["quantity"]?.replace(/[^0-9.]/g, "")?.split(".")?.[0],
+      item: obj?.["item"]?.replace(/[^0-9.]/g, "")?.split(".")?.[0],
+      description: obj?.["description"],
+      discountPercentage: obj?.["discountPercentage"]
+        ? obj?.["discountPercentage"]?.replace(/[^0-9.]/g, "")
+        : (Number(obj?.["discount"]?.replace(/[^0-9.]/g, "")) /
+            Number(obj?.["totalBeforeDiscount"]?.replace(/[^0-9.]/g, ""))) *
+            100 ===
+          1
+        ? 100
+        : isNaN(
+            (Number(obj?.["discount"]?.replace(/[^0-9.]/g, "")) /
+              Number(obj?.["totalBeforeDiscount"]?.replace(/[^0-9.]/g, ""))) *
+              100
+          )
+        ? 0
+        : (Number(obj?.["discount"]?.replace(/[^0-9.]/g, "")) /
+            Number(obj?.["totalBeforeDiscount"]?.replace(/[^0-9.]/g, ""))) *
+          100,
+    }));
+    console.log("...", extractedData);
+    console.log("...", extractedData?.filter(filteredOCRData));
+    return extractedData?.filter(filteredOCRData)?.filter((key: any) => {
+      const description = key?.description?.toLowerCase();
+      if (
+        !stringContainsAny(
+          [
+            "total",
+            "subtotal",
+            "tax",
+            "amount paid",
+            "payment",
+            "balance",
+            "due",
+            "rate",
+            "%",
+          ],
+          description
+        )
+      )
+        return !stringContainsAny(
+          [
+            "total",
+            "subtotal",
+            "tax",
+            "amount paid",
+            "payment",
+            "balance",
+            "due",
+            "rate",
+            "%",
+          ],
+          description
+        );
+    });
+  };
