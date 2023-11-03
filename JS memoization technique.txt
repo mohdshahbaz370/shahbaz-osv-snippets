@@ -1,0 +1,41 @@
+Memoization is an optimization technique that stores the results of expensive function calls and returns the cached result when the same inputs occur again.
+
+In other words, memoization is a way to speed up a function by storing its previously computed results and returning them instead of recomputing the result whenever the function is called with the same arguments.
+
+This is not only valid for JavaScript but also for other programming languages. In this article, we will take a closer look at memoization.
+
+As described above, in JavaScript, a memoized function is a function that remembers the results of previous calls and returns the cached result instead of executing the function again.
+
+This can be useful for improving the performance of functions that are called repeatedly with the same arguments.
+
+How to Create a Memoized Function
+Memoized functions are used to improve the performance of functions that are called repeatedly with the same arguments. They can be a bit tricky to understand. In the below, you can see a very simple example of how to create a memoized function:
+
+function add(a, b) {
+  // Create an object to store the results of previous calls to the add function
+  let cache = {};
+// Return a function that takes in two numbers as arguments
+  return function(a, b) {
+    // Create a string representation of the arguments to use as a key in the cache object
+    let key = `${a},${b}`;
+    // If the result for these arguments is in the cache, return it
+    if (key in cache) {
+      return cache[key];
+    } else {
+      // Otherwise, calculate the result and store it in the cache before returning it
+      let result = a + b;
+      cache[key] = result;
+      return result;
+    }
+  }
+}
+// Create a memoized version of the add function
+const memoizedAdd = add();
+console.log(memoizedAdd(2, 3)); // 5
+console.log(memoizedAdd(2, 3)); // 5 (returns cached result)
+In short, you can define a function as a closure that stores a cache object.
+
+The cache object is used to store the results of previous function calls.
+
+When the function is called with specific arguments, it checks to see if the result is already in the cache.
+
