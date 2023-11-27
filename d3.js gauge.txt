@@ -1,0 +1,381 @@
+import React, { useCallback, useEffect } from "react";
+import { useTranslation } from "react-i18next";
+import * as d3 from "d3";
+import { useSelector } from "react-redux";
+import { ICRAExport } from "../hooks/useCRADashboard";
+
+interface IProps {
+  craDetails: ICRAExport;
+}
+
+const CreditScore = (props: IProps) => {
+  const { craDetails } = props;
+  const hamburger = useSelector((state: any) => state?.userLogout?.hamburger);
+  const { t, i18n } = useTranslation();
+  const [loading, setLoading] = React.useState(false);
+  const drawControlRef = useCallback(
+    (node: any) => {
+      if (node !== null) {
+        const mediaQuery1440Max = window.matchMedia("(max-width: 1440px)");
+        const mediaQuery1336Max = window.matchMedia("(max-width: 1336px)");
+        const mediaQuery1280Max = window.matchMedia("(max-width: 1280px)");
+        const mediaQuery1170Max = window.matchMedia("(max-width: 1170px)");
+        let deviceWidth = 400; //default device width;
+        if (mediaQuery1440Max.matches) {
+          deviceWidth = 480;
+        }
+        if (mediaQuery1336Max.matches) {
+          deviceWidth = 450;
+        }
+        if (mediaQuery1280Max.matches) {
+          deviceWidth = 390;
+        }
+        if (mediaQuery1170Max.matches) {
+          deviceWidth = 375;
+        } else {
+          width = 300;
+        }
+        // set the dimensions and margins of the graph
+        var margin = { top: 10, right: 50, bottom: 20, left: 30 },
+          width = deviceWidth - margin.left - margin.right,
+          height = 290 - margin.top - margin.bottom;
+
+        // append the svg object to the body of the page
+        d3.select("#g1").selectAll("*").remove(); //To avoid multiple graphs
+
+        var svg = d3
+          .select("#g1")
+          .append("svg")
+          .attr("width", width + margin.left + margin.right)
+          .attr("height", height + margin.top + margin.bottom);
+
+        var arc = d3
+          .arc()
+          .innerRadius(160)
+          .outerRadius(95)
+          .cornerRadius(5)
+          .padAngle(0.03);
+
+        var arc2 = d3
+          .arc()
+          .innerRadius(140)
+          .outerRadius(90)
+          .cornerRadius(2)
+          .padAngle(0);
+
+        var scale = d3.scaleLinear().domain([1000, 0]).range([0, 180]);
+
+        //Here we build the guage
+        // // initialize pie chart
+        var pie = d3
+          .pie()
+          .startAngle((-1 * Math.PI) / 2)
+          .endAngle(Math.PI / 2)
+          .value(function (colors) {
+            return 30;
+          });
+
+        var pie2 = d3
+          .pie()
+          .startAngle((-1 * Math.PI) / 1.7)
+          .endAngle(Math.PI / 1.7)
+          .value(function (colors) {
+            return 30;
+          });
+
+        // define the colors for the gradient
+        // an array of colors
+        var colors = ["#eb3223", "#eb3223", "", "", "#62bd69"];
+        var colors2 = [""];
+
+        var defs = svg.append("defs");
+
+        var gradient = defs
+          .append("linearGradient")
+          .attr("id", "gradient")
+          .attr("x1", "0%")
+          .attr("y1", "0%")
+          .attr("x2", "100%")
+          .attr("y2", "0%");
+
+        gradient
+          .append("stop")
+          .attr("offset", "0%")
+          .attr("stop-color", "#eb3223");
+        gradient
+          .append("stop")
+          .attr("offset", "100%")
+          .attr("stop-color", "#5090f8");
+
+        var gradient2 = defs
+          .append("linearGradient")
+          .attr("id", "gradient2")
+          .attr("x1", "0%")
+          .attr("y1", "0%")
+          .attr("x2", "100%")
+          .attr("y2", "0%");
+
+        gradient2
+          .append("stop")
+          .attr("offset", "0%")
+          .attr("stop-color", "#5090f8");
+
+        gradient2
+          .append("stop")
+          .attr("offset", "100%")
+          .attr("stop-color", "#62bd69");
+
+        var gradient3 = defs
+          .append("linearGradient")
+          .attr("id", "gradient3")
+          .attr("x1", "0%")
+          .attr("y1", "0%")
+          .attr("x2", "100%")
+          .attr("y2", "0%");
+
+        gradient3
+          .append("stop")
+          .attr("offset", "0%")
+          .attr("stop-color", "#dbe1e9");
+
+        gradient3
+          .append("stop")
+          .attr("offset", "50%")
+          .attr("stop-color", "#ffffff");
+
+        gradient3
+          .append("stop")
+          .attr("offset", "100%")
+          .attr("stop-color", "#dbe1e9");
+
+        //Here we build the guage
+        // initialize pie chart
+        var pie = d3
+          .pie()
+          .startAngle((-1 * Math.PI) / 2)
+          .endAngle(Math.PI / 2)
+          .value(function (d) {
+            return 30;
+          });
+
+        var pie2 = d3
+          .pie()
+          .startAngle((-1 * Math.PI) / 1.7)
+          .endAngle(Math.PI / 1.7)
+          .value(function (d) {
+            return 30;
+          });
+
+        // draw the arcs. one for each color
+        var arcs = svg
+          .selectAll(".arc")
+          .data(pie(colors))
+          .enter()
+          .append("path")
+          .attr("id", (d, i) => {
+            return "uniqueId_" + i;
+          })
+          .attr("d", arc)
+          .attr("transform", "translate(200,200)")
+          .style("fill", function (d, i) {
+            if (i === 2) {
+              return "url(#gradient)";
+            } else if (i === 3) {
+              return "url(#gradient2)";
+            } else {
+              return colors[i];
+            }
+          });
+        var arcs2 = svg
+          .selectAll(".arc2")
+          .data(pie2(colors2))
+          .enter()
+          .append("path")
+          .attr("d", arc2)
+          .attr("transform", "translate(200,200)")
+          .style("fill", function (d, i) {
+            return "url(#gradient3)";
+          });
+
+        const meterRange = [
+          t("veryHigh"),
+          t("high"),
+          t("moderate"),
+          t("low"),
+          t("veryLow"),
+        ];
+
+        // append the month names to each slice
+        svg
+          .selectAll(".meterRangeText")
+          .data(meterRange)
+          .enter()
+          .append("text")
+          .attr("class", "meterRangeText")
+          .attr("x", 10) // move the text from the start angle of the arc
+          .attr("dy", -10) // move the text down
+          .append("textPath")
+          .attr("xlink:href", function (d, i) {
+            return "#uniqueId_" + i;
+          })
+          .text(function (d) {
+            return d;
+          });
+
+        var needle = svg
+          .selectAll(".needle")
+          .data([0])
+          .enter()
+          .append("line")
+          .attr("x1", -60)
+          .attr("x2", -70)
+          .attr("y1", 0)
+          .attr("y2", 0)
+          .classed("needle", true)
+          .style("stroke", "white")
+          // .style("stroke-width", 1)
+          .attr("transform", function (d) {
+            return " translate(200,200) rotate(" + d + ")";
+          });
+
+        // Adding a circle to one endpoint of the needle
+        var circle1 = svg
+          .append("circle")
+          .attr("cx", -70) // x-coordinate of the circle
+          .attr("cy", 0) // y-coordinate of the circle
+          .attr("r", 15) // radius of the circle
+          .style("fill", "rgba(255, 0, 0, 0)") // fill color of the circle
+          // .style("stroke", "#f3f5fd")
+          .attr("transform", "translate(200,200)"); // position relative to the SVG
+
+        var circle2 = svg
+          .append("circle")
+          .attr("cx", -70) // x-coordinate of the circle
+          .attr("cy", 0) // y-coordinate of the circle
+          .attr("r", 6) // radius of the circle
+          .style("fill", "rgba(255, 0, 0, 0)")
+          .style("stroke", "white") // fill color of the circle
+          .style("stroke-width", 2)
+          .attr("transform", "translate(200,200)"); // position relative to the SVG
+
+        // Adding a triangle to the other endpoint of the needle
+        var triangle1 = svg
+          .append("path")
+          .attr("d", d3.symbol().type(d3.symbolTriangle).size(800))
+          .attr("transform", "translate(200,200) rotate(180) translate(-85,50)")
+          .style("fill", "white");
+
+        var triangle2 = svg
+          .append("path")
+          .attr("d", d3.symbol().type(d3.symbolTriangle))
+          .attr("transform", "translate(200,200) rotate(180) translate(-85,50)")
+          .style("fill", "white");
+
+        svg
+          .selectAll(".needle")
+          .data([
+            1000 -
+              craDetails?.dashboardDetail?.data?.creditRiskAssessment
+                ?.creditScore,
+          ])
+          .transition()
+          .ease(d3.easeElasticOut)
+          .duration(1500)
+          .attr("transform", function (d) {
+            return "translate(200,200) rotate(" + scale(d) + ")";
+          })
+          .on("start", function (d) {
+            // Update the circle and triangle positions after needle transition ends
+            var currentAngle = scale(d); // Update with the new value
+            var circleX =
+              Math.cos(((currentAngle - 180) * Math.PI) / 180) * 150; // Calculate x-coordinate
+            var circleY =
+              Math.sin(((currentAngle - 180) * Math.PI) / 180) * 150; // Calculate y-coordinate
+            // var triangleX = Math.cos(currentAngle * Math.PI / 180) * 112; // Calculate x-coordinate
+            // var triangleY = Math.sin(currentAngle * Math.PI / 180) * 112; // Calculate y-coordinate
+            var triangle1Angle = currentAngle + 30;
+            var triangle2Angle = currentAngle + 30; // Calculate x-coordinate
+
+            circle1
+              .transition()
+              .duration(400) // Update circle position with transition
+              .attr("cx", circleX) // Translate to SVG coordinates
+              .attr("cy", circleY);
+            circle2
+              .transition()
+              .duration(400) // Update circle position with transition
+              .attr("cx", circleX) // Translate to SVG coordinates
+              .attr("cy", circleY);
+            triangle1
+              .transition()
+              .duration(400) // Update triangle position with transition
+              .attr(
+                "transform",
+                "translate(200,200) rotate(" +
+                  triangle1Angle +
+                  ") translate(-85,50)"
+              )
+              .style("fill", "white");
+            triangle2
+              .transition()
+              .duration(400) // Update triangle position with transition
+              .attr(
+                "transform",
+                "translate(200,200) rotate(" +
+                  triangle2Angle +
+                  ") translate(-85,50)"
+              )
+              .style("fill", "#62bd69");
+          });
+
+        // Display text in the center
+        svg
+          .append("text")
+          .attr("text-anchor", "middle")
+          .attr("class", "creditCheckTotal")
+          .attr("x", 100)
+          .attr("y", 150)
+          .style("font-size", "20px")
+          .style("fill", "black")
+          .selectAll("tspan")
+          .data([
+            t("score"),
+            craDetails?.dashboardDetail?.data?.creditRiskAssessment
+              ?.creditScore,
+            craDetails?.dashboardDetail?.data?.creditRiskAssessment
+              ?.creditLendRisk,
+          ])
+          .enter()
+          .append("tspan")
+          .attr("x", 200)
+          .attr("dy", "1.2em")
+          .text(function (d) {
+            return d;
+          });
+      }
+    },
+    [i18n.language, hamburger, craDetails?.dashboardDetail]
+  );
+
+  useEffect(() => {
+    setLoading(true);
+    let timeout = setTimeout(() => {
+      setLoading(false);
+      clearTimeout(timeout);
+    }, 100);
+  }, [hamburger]);
+
+  return (
+    <div className="creditWtCard w-48 isFlex justifyCenter">
+      {loading ? (
+        ""
+      ) : (
+        <>
+          <div id="g1" ref={drawControlRef}></div>
+        </>
+      )}
+    </div>
+  );
+};
+
+export default CreditScore;
