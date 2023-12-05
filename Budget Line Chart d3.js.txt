@@ -1,0 +1,462 @@
+import React, { useCallback, useEffect } from "react";
+import * as d3 from "d3";
+import { useTranslation } from "react-i18next";
+import moment from "moment";
+import { useSelector } from "react-redux";
+
+const BudgetLineChart = (props: any) => {
+  const {
+    isIncExpGraph,
+    graphDuration,
+    categoryCurrentLinearGrphData,
+    categoryPreviousLinearGrphData,
+    categoryLinearGrphData,
+    expenseLineGraphData,
+    categoryCurrency,
+    incomeCurrency,
+    expenseCurrency,
+    incomeLineGraphData,
+    categAsideLabels,
+    incExpYAxisLabelsGraph,
+  } = props;
+  const [loading, setLoading] = React.useState(false)
+  const hamburger = useSelector((state: any) => state?.userLogout?.hamburger);
+  const { t, i18n } = useTranslation();
+  const drawControlRef = useCallback(
+    (node) => {
+      if (node !== null) {
+  const mediaQuery1536Max = window.matchMedia("(max-width: 1536px)");
+  const mediaQuery1440Max = window.matchMedia("(max-width: 1440px)");
+  const mediaQuery1336Max = window.matchMedia("(max-width: 1336px)");
+  const mediaQuery1280Max = window.matchMedia("(max-width: 1280px)");
+  const mediaQuery1170Max = window.matchMedia("(max-width: 1170px)");
+  let deviceWidth = 500; //default device width;
+  if (mediaQuery1536Max.matches) {
+    deviceWidth = hamburger ? 396 :480;
+  }
+  if (mediaQuery1440Max.matches) {
+    deviceWidth = hamburger ? 387 :448;
+  }
+  if (mediaQuery1336Max.matches) {
+    deviceWidth = hamburger ? 340 :410;
+  }
+  if (mediaQuery1280Max.matches) {
+    deviceWidth = hamburger ? 330 :390;
+  }
+  if (mediaQuery1170Max.matches) {
+    deviceWidth = hamburger ? 290 :355;
+  } else {
+    width = 300;
+  }
+  // set the dimensions and margins of the graph
+  var margin = { top: 10, right: 50, bottom: 20, left: 30 },
+    width = deviceWidth - margin.left - margin.right,
+    height = 290 - margin.top - margin.bottom;
+
+  // append the svg object to the body of the page
+  d3.select("#lineGraph").selectAll("*").remove(); //To avoid multiple graphs
+
+  const scale = i18n.language === "en" ? 1 : -1; // checking arabic to mirror the SVG
+  let transformWidth = i18n.language === "en" ? margin.left : width + 20; // if arabic need to have more width
+
+  const tooltip = d3.select("#lineChartTooltip").attr("class", `tooltip1`);
+
+  var svg = d3
+    .select("#lineGraph")
+    .append("svg")
+    .attr("width", width + margin.left + margin.right)
+    .attr("height", height + margin.top + margin.bottom)
+    .append("g")
+    // .attr(
+    //   "transform",
+    //   "translate(" + margin.left + "," + margin.top + ")"
+    // )
+
+    .attr(
+      "transform",
+      "translate(" +
+        transformWidth +
+        "," +
+        margin.top +
+        ") scale(" +
+        scale +
+        ", 1)"
+    );
+
+  //Gradient colors for lines
+  const gradient = svg
+    .append("defs")
+    .append("linearGradient")
+    .attr("id", "gradient")
+    .attr("spreadMethod", "pad");
+
+  const gradient1 = svg
+    .append("defs")
+    .append("linearGradient")
+    .attr("id", "gradient1")
+    .attr("spreadMethod", "pad");
+
+  // Defining the line path and adding some styles
+  if (isIncExpGraph) {
+    gradient
+      .append("stop")
+      .attr("offset", "0%")
+      .attr("stop-color", "#fff")
+      .attr("stop-opacity", 1);
+
+    gradient
+      .append("stop")
+      .attr("offset", "100%")
+      .attr("stop-color", "#eb3223")
+      .attr("stop-opacity", 1);
+
+    gradient1
+      .append("stop")
+      .attr("offset", "0%")
+      .attr("stop-color", "#fff")
+      .attr("stop-opacity", 1);
+
+    gradient1
+      .append("stop")
+      .attr("offset", "100%")
+      .attr("stop-color", "#62bd69")
+      .attr("stop-opacity", 1);
+
+    const xScale = d3
+      .scaleTime()
+      .domain([
+        d3.min(incomeLineGraphData, (d) => d.date),
+        d3.max(incomeLineGraphData, (d) => d.date),
+      ])
+      .range([0, width]);
+    const yScale = d3
+      .scaleLinear()
+      .domain([
+        d3.min(incExpYAxisLabelsGraph, (d) => d.balance),
+        d3.max(incExpYAxisLabelsGraph, (d) => d.balance),
+      ])
+      .range([height, 0]);
+
+    const xScale2 = d3
+      .scaleTime()
+      .domain([
+        d3.min(expenseLineGraphData, (d) => d.date),
+        d3.max(expenseLineGraphData, (d) => d.date),
+      ])
+      .range([0, width]);
+    const yScale2 = d3
+      .scaleLinear()
+      .domain([
+        d3.min(incExpYAxisLabelsGraph, (d) => d.balance),
+        d3.max(incExpYAxisLabelsGraph, (d) => d.balance),
+      ])
+      .range([height, 0]);
+
+    // Drawing line with inner gradient and area
+    // Adding functionality to make line and area curved
+    const line = d3
+      .line()
+      .x(function (d) {
+        return xScale(d.date);
+      })
+      .y(function (d) {
+        return yScale(d.balance);
+      })
+      .curve(d3.curveCatmullRom.alpha(0.5));
+
+    const line2 = d3
+      .line()
+      .x(function (d) {
+        return xScale2(d.date);
+      })
+      .y(function (d) {
+        return yScale2(d.balance);
+      })
+      .curve(d3.curveCatmullRom.alpha(0.5));
+
+    const path = svg
+      .append("path")
+      .attr("d", line(incomeLineGraphData))
+      .attr("stroke-width", "4")
+      .style("fill", "none")
+      .attr("stroke", "url(#gradient1)");
+    // .attr("opacity", "0.3");
+
+    // Create a selection for circles
+    const circles = svg
+      .selectAll(".circle")
+      .data(incomeLineGraphData)
+      .enter()
+      .append("circle")
+      .attr("class", "circle")
+      .attr("cx", (d) => xScale(d.date))
+      .attr("cy", (d) => yScale(d.balance))
+      .attr("r", 5) // Radius of the circle
+      .attr("fill", "#30b93a")
+      // .attr("opacity", "0.3")
+      .on("mouseover", function (d) {
+        d3.select("#lineChartTooltip")
+          .html(function () {
+            return `<p class="budgetDateGraph budgetBalGraph">${moment(
+              d.date
+            ).format(
+              "MMM DD YYYY"
+            )}</p><p class="budgetBalGraph">${incomeCurrency} ${d.balance}</p>`;
+          })
+          .transition()
+          .duration(10)
+          .style("opacity", 1)
+          .style("left", i18n.language === "en" ? d3.event.pageX - 50 + "px" : d3.event.pageX - 50 + "px")
+          .style("top", i18n.language === "en" ? d3.event.pageY - 80 + "px":  d3.event.pageY - 80 + "px");
+      })
+      .on("mouseout", function () {
+        d3.select("#lineChartTooltip")
+          .transition()
+          .duration(250)
+          .style("opacity", 0);
+      });
+    // .on("mousemove", function () {
+    //   d3.select("#lineChartTooltip")
+    //   .style("left", d3.event.pageX - 50 + "px")
+    //   .style("top", d3.event.pageY - 80 + "px");
+    // });
+
+    const path2 = svg
+      .append("path")
+      .attr("d", line2(expenseLineGraphData))
+      .attr("stroke-width", "4")
+      .style("fill", "none")
+      .attr("stroke", "url(#gradient)");
+    // .attr("opacity", "0.3");
+
+    const circles2 = svg
+      .selectAll(".circle2")
+      .data(expenseLineGraphData)
+      .enter()
+      .append("circle")
+      .attr("class", "circle2")
+      .attr("cx", (d) => xScale2(d.date))
+      .attr("cy", (d) => yScale2(d.balance))
+      .attr("r", 5) // Radius of the circle
+      .attr("fill", "#eb3223") // Color of the circle
+      // .attr("opacity", "0.3")
+      .on("mouseover", function (d) {
+        d3.select("#lineChartTooltip")
+          .html(function () {
+            return `<p class="budgetDateGraph budgetBalGraph">${moment(
+              d.date
+            ).format(
+              "MMM DD YYYY"
+            )}</p><p class="budgetBalGraph">${expenseCurrency} ${d.balance}</p>`;
+          })
+          .transition()
+          .duration(10)
+          .style("opacity", 1)
+          .style("left", i18n.language === "en" ? d3.event.pageX - 50 + "px" : d3.event.pageX - 50 + "px")
+          .style("top", i18n.language === "en" ? d3.event.pageY - 80 + "px" : d3.event.pageY - 80 + "px");
+      })
+      .on("mouseout", function () {
+        d3.select("#lineChartTooltip")
+          .transition()
+          .duration(250)
+          .style("opacity", 0);
+      });
+    // .on("mousemove", function () {
+    //   d3.select("#lineChartTooltip")
+    //     .style("left", d3.event.pageX - 50 + "px")
+    //     .style("top", d3.event.pageY - 80 + "px");
+    // });
+
+    // Adding the x Axis
+    svg
+      .append("g")
+      .attr("transform", "translate(0," + height + ")")
+      .call(
+        d3
+          .axisBottom(xScale)
+          .tickSize(0)
+          .tickPadding(10)
+          .tickFormat(function (d: any) {
+            if (
+              graphDuration === "THM" ||
+              graphDuration === "UDM" ||
+              graphDuration === "LSM"
+            )
+              return moment(d).format("DD");
+            else return moment(d).format("MMM");
+          })
+      )
+      .selectAll("text")
+      .style("fill", "#8994a5");
+    // Adding the y Axis
+    svg
+      .append("g")
+      .call(
+        d3
+          .axisLeft(yScale)
+          .tickSize(0)
+          .tickPadding(10)
+          .ticks(4)
+          .tickFormat(d3.format(".2s"))
+      )
+      .selectAll("text")
+      .style("fill", "#8994a5");
+  } else {
+    gradient
+      .append("stop")
+      .attr("offset", "0%")
+      .attr(
+        "stop-color",
+        categAsideLabels?.isIncExpGraph === "expense" ? "#fff" : "#fff"
+      )
+      .attr("stop-opacity", 1);
+
+    gradient
+      .append("stop")
+      .attr("offset", "100%")
+      .attr(
+        "stop-color",
+        categAsideLabels?.isIncExpGraph === "expense" ? "#eb3223" : "#62bd69"
+      )
+      .attr("stop-opacity", 1);
+
+    const xScale = d3
+      .scaleTime()
+      .domain([
+        d3.min(categoryCurrentLinearGrphData, (d) => d.date),
+        d3.max(categoryCurrentLinearGrphData, (d) => d.date),
+      ])
+      .range([0, width]);
+    const yScale = d3
+      .scaleLinear()
+      .domain([
+        d3.min(categoryCurrentLinearGrphData, (d) => d.balance),
+        d3.max(categoryCurrentLinearGrphData, (d) => d.balance),
+      ])
+      .range([height, 0]);
+
+    // Drawing line with inner gradient and area
+    // Adding functionality to make line and area curved
+    const line = d3
+      .line()
+      .x(function (d) {
+        return xScale(d.date);
+      })
+      .y(function (d) {
+        return yScale(d.balance);
+      })
+      .curve(d3.curveCatmullRom.alpha(0.5));
+
+    const path = svg
+      .append("path")
+      .attr("d", line(categoryCurrentLinearGrphData))
+      .attr("stroke-width", "4")
+      .style("fill", "none")
+      .attr("stroke", "url(#gradient)");
+    // .attr("opacity", "0.3");
+
+    // Create a selection for circles
+    const circles = svg
+      .selectAll(".circle")
+      .data(categoryCurrentLinearGrphData)
+      .enter()
+      .append("circle")
+      .attr("class", "circle")
+      .attr("cx", (d) => xScale(d.date))
+      .attr("cy", (d) => yScale(d.balance))
+      .attr("r", 5) // Radius of the circle
+      .attr(
+        "fill",
+        categAsideLabels?.isIncExpGraph === "expense" ? "#eb3223" : "#30b93a"
+      )
+      // .attr("opacity", "0.3")
+      .on("mouseover", function (d) {
+        d3.select("#lineChartTooltip")
+          .html(function () {
+            return `<p class="budgetDateGraph budgetBalGraph">${moment(
+              d.date
+            ).format(
+              "MMM DD YYYY"
+            )}</p><p class="budgetBalGraph">${categoryCurrency} ${d.balance}</p>`;
+          })
+          .transition()
+          .duration(10)
+          .style("opacity", 1)
+          .style("left", i18n.language === "en" ? d3.event.pageX - 50 + "px" : d3.event.pageX - 50 + "px")
+          .style("top", i18n.language === "en" ? d3.event.pageY - 80 + "px" : d3.event.pageY - 80 + "px");
+      })
+      .on("mouseout", function () {
+        d3.select("#lineChartTooltip")
+          .transition()
+          .duration(250)
+          .style("opacity", 0);
+      });
+    // .on("mousemove", function () {
+    //   d3.select("#lineChartTooltip")
+    //     .style("left", d3.event.pageX - 50 + "px")
+    //     .style("top", d3.event.pageY - 80 + "px");
+    // });
+
+    // Adding the x Axis
+    svg
+      .append("g")
+      .attr("transform", "translate(0," + height + ")")
+      .call(
+        d3
+          .axisBottom(xScale)
+          .tickSize(0)
+          .tickPadding(10)
+          .tickFormat(function (d: any) {
+            if (
+              graphDuration === "THM" ||
+              graphDuration === "UDM" ||
+              graphDuration === "LSM"
+            )
+              return moment(d).format("DD");
+            else return moment(d).format("MMM");
+          })
+      )
+      .selectAll("text")
+      .style("fill", "#8994a5");
+    // Adding the y Axis
+    svg
+      .append("g")
+      .call(
+        d3
+          .axisLeft(yScale)
+          .tickSize(0)
+          .tickPadding(10)
+          .ticks(4)
+          .tickFormat(d3.format(".2s"))
+      )
+      .selectAll("text")
+      .style("fill", "#8994a5");
+  }
+}}, [i18n.language, hamburger, props])
+
+useEffect(() => {
+
+  setLoading(true)
+  let timeout = setTimeout(() => {
+    setLoading(false)
+    clearTimeout(timeout)
+  }, 100)
+
+}, [hamburger])
+
+  return (
+    <>
+      <div className="graph-container budgetLineChartGraph">
+      {loading ? "" : <>
+        <div id="lineGraph" ref={drawControlRef}></div>
+        <div id="lineChartTooltip"></div>
+        </>}
+      </div>
+      {/* <div className="chart-wrapper">
+                <div id="line-chart" className="chart"></div>
+            </div> */}
+    </>
+  );
+};
+
+export default BudgetLineChart;
