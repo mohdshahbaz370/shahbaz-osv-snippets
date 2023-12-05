@@ -1,3 +1,4 @@
+// Md Sarmad OSV-888 15-11-2023
 import React, { useCallback, useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import * as d3 from "d3";
@@ -47,7 +48,8 @@ const CreditScore = (props: IProps) => {
           .select("#g1")
           .append("svg")
           .attr("width", width + margin.left + margin.right)
-          .attr("height", height + margin.top + margin.bottom);
+          .attr("height", height + margin.top + margin.bottom)
+          .attr("margin-left", "100px")
 
         var arc = d3
           .arc()
@@ -335,8 +337,6 @@ const CreditScore = (props: IProps) => {
           .attr("class", "creditCheckTotal")
           .attr("x", 100)
           .attr("y", 150)
-          .style("font-size", "20px")
-          .style("fill", "black")
           .selectAll("tspan")
           .data([
             t("score"),
@@ -348,7 +348,7 @@ const CreditScore = (props: IProps) => {
           .enter()
           .append("tspan")
           .attr("x", 200)
-          .attr("dy", "1.2em")
+          .attr("dy", "1em")
           .text(function (d) {
             return d;
           });
@@ -372,6 +372,10 @@ const CreditScore = (props: IProps) => {
       ) : (
         <>
           <div id="g1" ref={drawControlRef}></div>
+          <div className="creditGraphText">
+            User generally shows a good ability to be able to repay credit.
+            Good financial transaction history and behaviour
+          </div>
         </>
       )}
     </div>
