@@ -49,7 +49,7 @@ const CreditScore = (props: IProps) => {
           .append("svg")
           .attr("width", width + margin.left + margin.right)
           .attr("height", height + margin.top + margin.bottom)
-          .attr("margin-left", "100px")
+          .attr("margin-left", "100px");
 
         var arc = d3
           .arc()
@@ -341,7 +341,10 @@ const CreditScore = (props: IProps) => {
           .data([
             t("score"),
             craDetails?.dashboardDetail?.data?.creditRiskAssessment
-              ?.creditScore,
+              ?.creditScore > 1000
+              ? 1000
+              : craDetails?.dashboardDetail?.data?.creditRiskAssessment
+                  ?.creditScore,
             craDetails?.dashboardDetail?.data?.creditRiskAssessment
               ?.creditLendRisk,
           ])
@@ -368,13 +371,15 @@ const CreditScore = (props: IProps) => {
   return (
     <div className="creditWtCard w-48 isFlex justifyCenter">
       {loading ? (
-        ""
+        <>
+          <div className="analysticsPieChartLoader"></div>
+        </>
       ) : (
         <>
           <div id="g1" ref={drawControlRef}></div>
           <div className="creditGraphText">
-            User generally shows a good ability to be able to repay credit.
-            Good financial transaction history and behaviour
+            User generally shows a good ability to be able to repay credit. Good
+            financial transaction history and behaviour
           </div>
         </>
       )}
