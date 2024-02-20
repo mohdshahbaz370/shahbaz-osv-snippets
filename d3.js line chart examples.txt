@@ -1,0 +1,988 @@
+// These examples are for reference purposes and can be used.
+// But we need to test it before its use, and if there are bugs or errors,
+// then we need to fix it.
+
+// EXAMPLE 1:
+// This one is working
+// import * as d3 from "d3";
+
+// export default function App() {
+//   const lineData = [
+//     {
+//       values: [
+//         // { date: "2020/01/01", total: 230 },
+//         { date: "2020/02/01", total: 290 },
+//         { date: "2020/03/01", total: 230 },
+//         { date: "2020/04/01", total: 270 }
+//         // { date: "2020/05/01", total: 244 },
+//         // { date: "2020/06/01", total: 270 },
+//         // { date: "2020/07/01", total: 320 },
+//         // { date: "2020/08/01", total: 320 },
+//         // { date: "2020/09/01", total: 250 },
+//         // { date: "2020/10/01", total: 272 }
+//       ]
+//     }
+//   ];
+//   // Selecting the element
+//   const element = document.getElementById("line-chart");
+
+//   // Setting dimensions
+//   const margin = { top: 40, right: 30, bottom: 7, left: 50 },
+//     width = 900 - margin.left - margin.right,
+//     height = 300 - margin.top - margin.bottom;
+
+//   // Parsing timestamps
+//   const parseTime = d3.timeParse("%Y/%m/%d");
+
+//   const parsedData = lineData.map((item) => ({
+//     values: item.values.map((val) => ({
+//       total: val.total,
+//       date: parseTime(val.date)
+//     }))
+//   }));
+
+//   // Appending svg to a selected element
+//   const svg = d3
+//     .select(element)
+//     .append("svg")
+//     .attr("width", width + margin.left + margin.right)
+//     .attr("height", 300 + margin.top + margin.bottom)
+//     .attr("viewBox", `0 40 ${width + 80} ${height}`)
+//     .append("g")
+//     .attr("transform", `translate(${margin.left}, ${margin.top})`);
+
+//   // Setting X,Y scale ranges
+//   const xScale = d3
+//     .scaleTime()
+//     .domain([
+//       d3.min(parsedData, (d) => d3.min(d.values, (v) => v.date)),
+//       d3.max(parsedData, (d) => d3.max(d.values, (v) => v.date))
+//     ])
+//     .range([0, width]);
+
+//   const yScale = d3
+//     .scaleLinear()
+//     .domain([
+//       d3.min(parsedData, (d) => d3.min(d.values, (v) => v.total)),
+//       d3.max(parsedData, (d) => d3.max(d.values, (v) => v.total))
+//     ])
+//     .range([height, 0]);
+
+//   const chartSvg = svg.selectAll(".line").data(parsedData).enter();
+
+//   // Drawing line with inner gradient and area
+//   // Adding functionality to make line and area curved
+//   const line = d3
+//     .line()
+//     .x(function (d) {
+//       return xScale(d.date);
+//     })
+//     .y(function (d) {
+//       return yScale(d.total);
+//     })
+//     .curve(d3.curveCatmullRom.alpha(0.5));
+
+//   // Defining the line path and adding some styles
+//   const path = chartSvg
+//     .append("path")
+//     .attr("d", function (d) {
+//       return line(d.values);
+//     })
+//     .attr("stroke-width", "2")
+//     .style("fill", "none")
+//     .attr("stroke", "green");
+
+//   // Adding the x Axis
+//   svg
+//     .append("g")
+//     .attr("transform", "translate(0," + height + ")")
+//     .call(d3.axisBottom(xScale));
+
+//   // Adding the y Axis
+//   svg.append("g").call(d3.axisLeft(yScale));
+//   return (
+//     <div className="chart-wrapper">
+//       <div id="line-chart" className="chart"></div>
+//     </div>
+//   );
+// }
+
+// import React, { useEffect } from "react";
+// import * as d3 from "d3";
+// import moment from "moment";
+
+// export default function App() {
+//   const lineData = [
+//     {
+//       values: [
+//         { date: "2020/07/01", total: 270 },
+//         { date: "2020/08/01", total: 280 },
+//         { date: "2020/09/01", total: 290 }
+//       ]
+//     }
+//   ];
+
+//   // Selecting the element
+//   const element = document.getElementById("line-chart");
+
+//   // Setting dimensions
+//   const margin = { top: 40, right: 30, bottom: 7, left: 50 },
+//     width = 900 - margin.left - margin.right,
+//     height = 300 - margin.top - margin.bottom;
+
+//   // Parsing timestamps
+//   const parseTime = d3.timeParse("%Y/%m/%d");
+
+//   const parsedData = lineData.map((item) => ({
+//     values: item.values.map((val) => ({
+//       total: val.total,
+//       date: parseTime(val.date)
+//     }))
+//   }));
+
+//   // Appending svg to a selected element
+//   const svg = d3
+//     .select(element)
+//     .append("svg")
+//     .attr("width", width + margin.left + margin.right)
+//     .attr("height", 300 + margin.top + margin.bottom)
+//     .attr("viewBox", `0 40 ${width + 80} ${height}`)
+//     .append("g")
+//     .attr("transform", `translate(${margin.left}, ${margin.top})`);
+
+//   // Setting X,Y scale ranges
+//   const xScale = d3
+//     .scaleTime()
+//     .domain([
+//       d3.min(parsedData, (d) => d3.min(d.values, (v) => v.date)),
+//       d3.max(parsedData, (d) => d3.max(d.values, (v) => v.date))
+//     ])
+//     .range([0, width]);
+
+//   const yScale = d3
+//     .scaleLinear()
+//     .domain([
+//       d3.min(parsedData, (d) => d3.min(d.values, (v) => v.total)),
+//       d3.max(parsedData, (d) => d3.max(d.values, (v) => v.total))
+//     ])
+//     .range([height, 0]);
+
+//   const chartSvg = svg.selectAll(".line").data(parsedData).enter();
+
+//   // Drawing line with inner gradient and area
+//   // Adding functionality to make line and area curved
+//   const line = d3
+//     .line()
+//     .x(function (d) {
+//       return xScale(d.date);
+//     })
+//     .y(function (d) {
+//       return yScale(d.total);
+//     })
+//     .curve(d3.curveCatmullRom.alpha(0.5));
+
+//   // Defining the line path and adding some styles
+//   const path = chartSvg
+//     .append("path")
+//     .attr("d", function (d) {
+//       return line(d.values);
+//     })
+//     .attr("stroke-width", "2")
+//     .style("fill", "none")
+//     .attr("stroke", "green");
+
+//   // Create a selection for circles
+//   const circles = chartSvg
+//     .selectAll(".circle")
+//     .data((d) => d.values)
+//     .enter()
+//     .append("circle")
+//     .attr("class", "circle")
+//     .attr("cx", (d) => xScale(d.date))
+//     .attr("cy", (d) => yScale(d.total))
+//     .attr("r", 5) // Radius of the circle
+//     .attr("fill", "red"); // Color of the circle
+
+//   // Adding the x Axis
+//   svg
+//     .append("g")
+//     .attr("transform", "translate(0," + height + ")")
+//     .call(d3.axisBottom(xScale).tickSize(0).tickPadding(10));
+
+//   // Adding the y Axis
+//   svg.append("g").call(d3.axisLeft(yScale).tickSize(0).tickPadding(10));
+
+//   return (
+//     <div className="chart-wrapper">
+//       <div id="line-chart" className="chart"></div>
+//     </div>
+//   );
+// }
+
+import React, { useEffect, useState } from "react";
+import moment from "moment";
+import * as d3 from "d3";
+
+export default function App() {
+  const [lineData, setLineData] = useState([
+    {
+      values: [
+        { date: "2020/01/01", total: 290 },
+        { date: "2020/07/01", total: 230 },
+        { date: "2022/11/01", total: 270 }
+      ]
+    }
+  ]);
+
+ const parseTime = d3.timeParse("%Y/%m/%d");
+
+  const [selectedDuration, setSelectedDuration] = useState("3months");
+  useEffect(() => {
+    // Selecting the element
+    const element = document.getElementById("line-chart");
+
+    // Setting dimensions
+    const margin = { top: 40, right: 30, bottom: 7, left: 50 },
+      width = 900 - margin.left - margin.right,
+      height = 300 - margin.top - margin.bottom;
+
+    // Parsing timestamps
+    const parseTime = d3.timeParse("%Y/%m/%d");
+
+    const parsedData = lineData.map((item) => ({
+      values: item.values.map((val) => ({
+        total: val.total,
+        date: parseTime(val.date)
+      }))
+    }));
+
+    // Appending svg to a selected element
+    const svg = d3
+      .select(element)
+      .append("svg")
+      .attr("width", width + margin.left + margin.right)
+      .attr("height", 300 + margin.top + margin.bottom)
+      .attr("viewBox", `0 40 ${width + 80} ${height}`)
+      .append("g")
+      .attr("transform", `translate(${margin.left}, ${margin.top})`);
+
+    // Setting X,Y scale ranges
+    const xScale = d3
+      .scaleTime()
+      .domain([
+        d3.min(parsedData, (d) => d3.min(d.values, (v) => v.date)),
+        d3.max(parsedData, (d) => d3.max(d.values, (v) => v.date))
+      ])
+      .range([0, width]);
+
+    const yScale = d3
+      .scaleLinear()
+      .domain([
+        d3.min(parsedData, (d) => d3.min(d.values, (v) => v.total)),
+        d3.max(parsedData, (d) => d3.max(d.values, (v) => v.total))
+      ])
+      .range([height, 0]);
+
+    // Calculate the new domain based on the selected duration
+    let newDomain;
+    const currentDate = new Date();
+    if (selectedDuration === "3months") {
+      newDomain = [
+        new Date(moment("2020/09/09", "YYYY/MM/DD").subtract(3, "months")),
+        currentDate
+      ];
+    } else if (selectedDuration === "6months") {
+      newDomain = [
+        new Date(moment("2020/09/09", "YYYY/MM/DD").subtract(6, "months")),
+        currentDate
+      ];
+    } else if (selectedDuration === "12months") {
+      newDomain = [
+        new Date(moment("2020/09/09", "YYYY/MM/DD").subtract(12, "months")),
+        currentDate
+      ];
+    } else if (selectedDuration === "thismonth") {
+      newDomain = [
+        moment().startOf("month").toDate(),
+        moment().endOf("month").toDate()
+      ];
+    } else if (selectedDuration === "lastmonth") {
+      const lastMonth = new Date(
+        moment("2020/09/09", "YYYY/MM/DD").subtract(1, "months")
+      );
+      newDomain = [lastMonth, currentDate];
+    } else if (selectedDuration === "thisyear") {
+      newDomain = [moment().startOf("year").toDate(), currentDate];
+    }
+
+    // Update the x-axis scale with the new domain
+    xScale.domain(newDomain);
+    console.log(moment().startOf("year").toDate());
+
+    const chartSvg = svg.selectAll(".line").data(parsedData).enter();
+
+    // Drawing line with inner gradient and area
+    // Adding functionality to make line and area curved
+    const line = d3
+      .line()
+      .x(function (d) {
+        return xScale(d.date);
+      })
+      .y(function (d) {
+        return yScale(d.total);
+      })
+      .curve(d3.curveCatmullRom.alpha(0.5));
+
+    // Defining the line path and adding some styles
+    const path = chartSvg
+      .append("path")
+      .attr("d", function (d) {
+        return line(d.values);
+      })
+      .attr("stroke-width", "2")
+      .style("fill", "none")
+      .attr("stroke", "green");
+
+    // Create a selection for circles
+    const circles = chartSvg
+      .selectAll(".circle")
+      .data((d) => d.values)
+      .enter()
+      .append("circle")
+      .attr("class", "circle")
+      .attr("cx", (d) => xScale(d.date))
+      .attr("cy", (d) => yScale(d.total))
+      .attr("r", 5) // Radius of the circle
+      .attr("fill", "red"); // Color of the circle
+
+    // Adding the x Axis
+    svg
+      .append("g")
+      .attr("transform", "translate(0," + height + ")")
+      .call(d3.axisBottom(xScale).tickSize(0).tickPadding(10));
+
+    // Adding the y Axis
+    svg.append("g").call(d3.axisLeft(yScale).tickSize(0).tickPadding(10));
+  }, [selectedDuration]);
+  return (
+    <>
+      <div className="chart-wrapper">
+        <div id="line-chart" className="chart"></div>
+      </div>
+      <label>
+        Select Time Duration:
+        <select
+          value={selectedDuration}
+          onChange={(e) => setSelectedDuration(e.target.value)}
+        >
+          <option value="3months">Last 3 Months</option>
+          <option value="6months">Last 6 Months</option>
+          <option value="12months">Last 12 Months</option>
+          <option value="thismonth">This Month</option>
+          <option value="lastmonth">Last Month</option>
+          <option value="thisyear">This Year</option>
+        </select>
+      </label>
+    </>
+  );
+}
+
+
+
+// EXAMPLE 2:
+// For this example there is a reference error
+import React, { useEffect, useState } from "react";
+import moment from "moment";
+import * as d3 from "d3";
+
+export default function App() {
+  const Datedata = [
+    { date: "2023/08/15", total: 600 },
+    { date: "2023/07/06", total: 500 },
+    { date: "2023/06/05", total: 400 },
+    { date: "2023/05/03", total: 450 },
+    { date: "2023/04/15", total: 480 },
+    { date: "2023/03/06", total: 300 },
+    { date: "2023/02/05", total: 350 },
+    { date: "2023/01/03", total: 390 },
+    { date: "2022/12/15", total: 550 },
+    { date: "2022/11/06", total: 320 },
+    { date: "2022/10/05", total: 200 },
+    { date: "2022/09/03", total: 350 }
+  ];
+  // const Datedata1 = [
+  //   { date: 1 },
+  //   { date: 2 },
+  //   { date: 3 },
+  //   { date: 4 },
+  //   { date: 5 },
+  //   { date: 6 },
+  //   { date: 7 },
+  //   { date: 8 },
+  //   { date: 9 },
+  //   { date: 10 },
+  //   { date: 11 },
+  //   { date: 12 }
+  // ];
+
+  const [selectedDuration, setSelectedDuration] = useState("3months");
+  useEffect(() => {
+    // Selecting the element
+    const element = document.getElementById("line-chart");
+
+    // Setting dimensions
+    const margin = { top: 40, right: 30, bottom: 7, left: 50 },
+      width = 900 - margin.left - margin.right,
+      height = 300 - margin.top - margin.bottom;
+
+    // Appending svg to a selected element
+    const svg = d3
+      .select(element)
+      .append("svg")
+      .attr("width", width + margin.left + margin.right)
+      .attr("height", 300 + margin.top + margin.bottom)
+      .attr("viewBox", `0 40 ${width + 80} ${height}`)
+      .append("g")
+      .attr("transform", `translate(${margin.left}, ${margin.top})`)
+      .attr("id", "graphLine");
+
+    // Setting X,Y scale ranges
+    // const xScale = d3
+    //   .scaleTime()
+    //   .domain([
+    //     d3.min(parsedData, (d) => d3.min(d.values, (v) => v.date)),
+    //     d3.max(parsedData, (d) => d3.max(d.values, (v) => v.date))
+    //   ])
+    //   .range([0, width]);
+
+    // const xScale = d3.scaleLinear().domain([1, 4]).range([0, width]);
+    const xScale = d3.scaleLinear().domain([1, 12]).range([0, width]);
+    const yScale = d3
+      .scaleLinear()
+      .domain([
+        d3.min(Datedata1, (d) => d.total),
+        d3.max(Datedata1, (d) => d.total)
+      ])
+      .range([height, 0]);
+
+    // Calculate the new domain based on the selected duration
+    // let newDomain;
+    // const currentDate = new Date();
+    // if (selectedDuration === "3months") {
+    // const Datedata1 = [{ date: 1 }, { date: 2 }, { date: 3 }];
+    // const oneMonth = Datedata.filter((itm) =>
+    //   moment(itm?.date).isBetween(
+    //     moment().subtract(1, "months").startOf("month").subtract(1, "days"),
+    //     moment().subtract(1, "months").endOf("month")
+    //   )
+    // );
+    // const twoMonth = Datedata.filter((itm) =>
+    //   moment(itm?.date).isBetween(
+    //     moment().subtract(2, "months").startOf("month").subtract(1, "days"),
+    //     moment().subtract(2, "months").endOf("month")
+    //   )
+    // );
+    // const threeMonth = Datedata.filter((itm) =>
+    //   moment(itm?.date).isBetween(
+    //     moment().subtract(3, "months").startOf("month").subtract(1, "days"),
+    //     moment().subtract(3, "months").endOf("month")
+    //   )
+    // );
+    // let balanceOneMonth = 0;
+    // let balanceTwoMonth = 0;
+    // let balanceThreeMonth = 0;
+
+    // oneMonth.forEach((itm) => (balanceOneMonth += itm?.total));
+    // twoMonth.forEach((itm) => (balanceTwoMonth += itm?.total));
+    // threeMonth.forEach((itm) => (balanceThreeMonth += itm?.total));
+    // Datedata1[0].total = balanceOneMonth;
+    // Datedata1[1].total = balanceTwoMonth;
+    // Datedata1[2].total = balanceThreeMonth;
+    // } else if (selectedDuration === "6months") {
+    // const Datedata1 = [
+    //   { date: 1 },
+    //   { date: 2 },
+    //   { date: 3 },
+    //   { date: 4 },
+    //   { date: 5 },
+    //   { date: 6 }
+    // ];
+    //    const oneMonth = Datedata.filter((itm) =>
+    //    moment(itm?.date).isBetween(
+    //      moment().subtract(1, "months").startOf("month").subtract(1, "days"),
+    //      moment().subtract(1, "months").endOf("month")
+    //    )
+    //  );
+    //  const twoMonth = Datedata.filter((itm) =>
+    //    moment(itm?.date).isBetween(
+    //      moment().subtract(2, "months").startOf("month").subtract(1, "days"),
+    //      moment().subtract(2, "months").endOf("month")
+    //    )
+    //  );
+    //  const threeMonth = Datedata.filter((itm) =>
+    //    moment(itm?.date).isBetween(
+    //      moment().subtract(3, "months").startOf("month").subtract(1, "days"),
+    //      moment().subtract(3, "months").endOf("month")
+    //    )
+    //  );
+    //  const fourMonth = Datedata.filter((itm) =>
+    //    moment(itm?.date).isBetween(
+    //      moment().subtract(4, "months").startOf("month").subtract(1, "days"),
+    //      moment().subtract(4, "months").endOf("month")
+    //    )
+    //  );
+    //  const fiveMonth = Datedata.filter((itm) =>
+    //    moment(itm?.date).isBetween(
+    //      moment().subtract(5, "months").startOf("month").subtract(1, "days"),
+    //      moment().subtract(5, "months").endOf("month")
+    //    )
+    //  );
+    //  const sixMonth = Datedata.filter((itm) =>
+    //    moment(itm?.date).isBetween(
+    //      moment().subtract(6, "months").startOf("month").subtract(1, "days"),
+    //      moment().subtract(6, "months").endOf("month")
+    //    )
+    //  );
+
+    //  let balanceOneMonth = 0;
+    //  let balanceTwoMonth = 0;
+    //  let balanceThreeMonth = 0;
+    //  let balanceFourMonth = 0;
+    //  let balanceFiveMonth = 0;
+    //  let balanceSixMonth = 0;
+
+    //  oneMonth.forEach((itm) => (balanceOneMonth += itm?.total));
+    //  twoMonth.forEach((itm) => (balanceTwoMonth += itm?.total));
+    //  threeMonth.forEach((itm) => (balanceThreeMonth += itm?.total));
+    //  fourMonth.forEach((itm) => (balanceFourMonth += itm?.total));
+    //  fiveMonth.forEach((itm) => (balanceFiveMonth += itm?.total));
+    //  sixMonth.forEach((itm) => (balanceSixMonth += itm?.total));
+    //  Datedata1[0].total = balanceOneMonth;
+    //  Datedata1[1].total = balanceTwoMonth;
+    //  Datedata1[2].total = balanceThreeMonth;
+    //  Datedata1[3].total = balanceFourMonth;
+    //  Datedata1[4].total = balanceFiveMonth;
+    //  Datedata1[5].total = balanceSixMonth;
+    // } else if (selectedDuration === "12months") {
+    // const Datedata1 = [
+    //   { date: 1 },
+    //   { date: 2 },
+    //   { date: 3 },
+    //   { date: 4 },
+    //   { date: 5 },
+    //   { date: 6 },
+    //   { date: 7 },
+    //   { date: 8 },
+    //   { date: 9 },
+    //   { date: 10 },
+    //   { date: 11 },
+    //   { date: 12 }
+    // ];
+    // const oneMonth = Datedata.filter((itm) =>
+    //   moment(itm?.date).isBetween(
+    //     moment().subtract(1, "months").startOf("month").subtract(1, "days"),
+    //     moment().subtract(1, "months").endOf("month")
+    //   )
+    // );
+    // const twoMonth = Datedata.filter((itm) =>
+    //   moment(itm?.date).isBetween(
+    //     moment().subtract(2, "months").startOf("month").subtract(1, "days"),
+    //     moment().subtract(2, "months").endOf("month")
+    //   )
+    // );
+    // const threeMonth = Datedata.filter((itm) =>
+    //   moment(itm?.date).isBetween(
+    //     moment().subtract(3, "months").startOf("month").subtract(1, "days"),
+    //     moment().subtract(3, "months").endOf("month")
+    //   )
+    // );
+    // const fourMonth = Datedata.filter((itm) =>
+    //   moment(itm?.date).isBetween(
+    //     moment().subtract(4, "months").startOf("month").subtract(1, "days"),
+    //     moment().subtract(4, "months").endOf("month")
+    //   )
+    // );
+    // const fiveMonth = Datedata.filter((itm) =>
+    //   moment(itm?.date).isBetween(
+    //     moment().subtract(5, "months").startOf("month").subtract(1, "days"),
+    //     moment().subtract(5, "months").endOf("month")
+    //   )
+    // );
+    // const sixMonth = Datedata.filter((itm) =>
+    //   moment(itm?.date).isBetween(
+    //     moment().subtract(6, "months").startOf("month").subtract(1, "days"),
+    //     moment().subtract(6, "months").endOf("month")
+    //   )
+    // );
+    // const sevenMonth = Datedata.filter((itm) =>
+    //   moment(itm?.date).isBetween(
+    //     moment().subtract(7, "months").startOf("month").subtract(1, "days"),
+    //     moment().subtract(7, "months").endOf("month")
+    //   )
+    // );
+    // const eightMonth = Datedata.filter((itm) =>
+    //   moment(itm?.date).isBetween(
+    //     moment().subtract(8, "months").startOf("month").subtract(1, "days"),
+    //     moment().subtract(8, "months").endOf("month")
+    //   )
+    // );
+    // const nineMonth = Datedata.filter((itm) =>
+    //   moment(itm?.date).isBetween(
+    //     moment().subtract(9, "months").startOf("month").subtract(1, "days"),
+    //     moment().subtract(9, "months").endOf("month")
+    //   )
+    // );
+    // const tenMonth = Datedata.filter((itm) =>
+    //   moment(itm?.date).isBetween(
+    //     moment().subtract(10, "months").startOf("month").subtract(1, "days"),
+    //     moment().subtract(10, "months").endOf("month")
+    //   )
+    // );
+    // const elevenMonth = Datedata.filter((itm) =>
+    //   moment(itm?.date).isBetween(
+    //     moment().subtract(11, "months").startOf("month").subtract(1, "days"),
+    //     moment().subtract(11, "months").endOf("month")
+    //   )
+    // );
+    // const twelveMonth = Datedata.filter((itm) =>
+    //   moment(itm?.date).isBetween(
+    //     moment().subtract(12, "months").startOf("month").subtract(1, "days"),
+    //     moment().subtract(12, "months").endOf("month")
+    //   )
+    // );
+
+    // let balanceOneMonth = 0;
+    // let balanceTwoMonth = 0;
+    // let balanceThreeMonth = 0;
+    // let balanceFourMonth = 0;
+    // let balanceFiveMonth = 0;
+    // let balanceSixMonth = 0;
+    // let balanceSevenMonth = 0;
+    // let balanceEightMonth = 0;
+    // let balanceNineMonth = 0;
+    // let balanceTenMonth = 0;
+    // let balanceElevenMonth = 0;
+    // let balanceTwelveMonth = 0;
+
+    // oneMonth.forEach((itm) => (balanceOneMonth += itm?.total));
+    // twoMonth.forEach((itm) => (balanceTwoMonth += itm?.total));
+    // threeMonth.forEach((itm) => (balanceThreeMonth += itm?.total));
+    // fourMonth.forEach((itm) => (balanceFourMonth += itm?.total));
+    // fiveMonth.forEach((itm) => (balanceFiveMonth += itm?.total));
+    // sixMonth.forEach((itm) => (balanceSixMonth += itm?.total));
+    // sevenMonth.forEach((itm) => (balanceSevenMonth += itm?.total));
+    // eightMonth.forEach((itm) => (balanceEightMonth += itm?.total));
+    // nineMonth.forEach((itm) => (balanceNineMonth += itm?.total));
+    // tenMonth.forEach((itm) => (balanceTenMonth += itm?.total));
+    // elevenMonth.forEach((itm) => (balanceElevenMonth += itm?.total));
+    // twelveMonth.forEach((itm) => (balanceTwelveMonth += itm?.total));
+    // Datedata1[0].total = balanceOneMonth;
+    // Datedata1[1].total = balanceTwoMonth;
+    // Datedata1[2].total = balanceThreeMonth;
+    // Datedata1[3].total = balanceFourMonth;
+    // Datedata1[4].total = balanceFiveMonth;
+    // Datedata1[5].total = balanceSixMonth;
+    // Datedata1[6].total = balanceSevenMonth;
+    // Datedata1[7].total = balanceEightMonth;
+    // Datedata1[8].total = balanceNineMonth;
+    // Datedata1[9].total = balanceTenMonth;
+    // Datedata1[10].total = balanceElevenMonth;
+    // Datedata1[11].total = balanceTwelveMonth;
+    // } else if (selectedDuration === "thismonth") {
+    // const Datedata1 = [{ date: 1 }, { date: 2 }, { date: 3 }, { date: 4 }];
+    // const oneToSeven = Datedata.filter((itm) =>
+    //   moment(itm?.date).isBefore(moment().startOf("month").add(7, "days"))
+    // );
+    // const sevenToSixteen = Datedata.filter((itm) =>
+    //   moment(itm?.date).isBetween(
+    //     moment().startOf("month").add(7, "days"),
+    //     moment().startOf("month").add(16, "days")
+    //   )
+    // );
+    // const seventeenToTwentyFour = Datedata.filter((itm) =>
+    //   moment(itm?.date).isBetween(
+    //     moment().startOf("month").add(15, "days"),
+    //     moment().startOf("month").add(24, "days")
+    //   )
+    // );
+    // const TwentyFourToThirtyOne = Datedata.filter((itm) =>
+    //   moment(itm?.date).isBetween(
+    //     moment().startOf("month").add(22, "days"),
+    //     moment().startOf("month").add(30, "days")
+    //   )
+    // );
+    // let balance7 = 0;
+    // let balance16 = 0;
+    // let balance24 = 0;
+    // let balance31 = 0;
+    // oneToSeven.forEach((itm) => (balance7 += itm?.total));
+    // sevenToSixteen.forEach((itm) => (balance16 += itm?.total));
+    // seventeenToTwentyFour.forEach((itm) => (balance24 += itm?.total));
+    // TwentyFourToThirtyOne.forEach((itm) => (balance31 += itm?.total));
+    // Datedata1[0].total = balance7;
+    // Datedata1[1].total = balance16;
+    // Datedata1[2].total = balance24;
+    // Datedata1[3].total = balance31;
+    // } else if (selectedDuration === "lastmonth") {
+    // const Datedata1 = [{ date: 1 }, { date: 2 }, { date: 3 }, { date: 4 }];
+    // const oneToSeven = Datedata.filter((itm) =>
+    //   moment(itm?.date).isBefore(
+    //     moment().subtract(1, "months").startOf("month").add(7, "days")
+    //   )
+    // );
+    // const sevenToSixteen = Datedata.filter((itm) =>
+    //   moment(itm?.date).isBetween(
+    //     moment().subtract(1, "months").startOf("month").add(7, "days"),
+    //     moment().subtract(1, "months").startOf("month").add(16, "days")
+    //   )
+    // );
+    // const seventeenToTwentyFour = Datedata.filter((itm) =>
+    //   moment(itm?.date).isBetween(
+    //     moment().subtract(1, "months").startOf("month").add(15, "days"),
+    //     moment().subtract(1, "months").startOf("month").add(24, "days")
+    //   )
+    // );
+    // const TwentyFourToThirtyOne = Datedata.filter((itm) =>
+    //   moment(itm?.date).isBetween(
+    //     moment().subtract(1, "months").startOf("month").add(22, "days"),
+    //     moment().subtract(1, "months").startOf("month").add(31, "days")
+    //   )
+    // );
+    // let balance7 = 0;
+    // let balance16 = 0;
+    // let balance24 = 0;
+    // let balance31 = 0;
+    // oneToSeven.forEach((itm) => (balance7 += itm?.total));
+    // sevenToSixteen.forEach((itm) => (balance16 += itm?.total));
+    // seventeenToTwentyFour.forEach((itm) => (balance24 += itm?.total));
+    // TwentyFourToThirtyOne.forEach((itm) => (balance31 += itm?.total));
+    // Datedata1[0].total = balance7;
+    // Datedata1[1].total = balance16;
+    // Datedata1[2].total = balance24;
+    // Datedata1[3].total = balance31;
+    // } else if (selectedDuration === "thisyear") {
+    //   newDomain = [moment().startOf("year").toDate(), currentDate];
+    // }
+
+    // Update the x-axis scale with the new domain
+    // xScale.domain(newDomain);
+
+    // Drawing line with inner gradient and area
+    // Adding functionality to make line and area curved
+    const line = d3
+      .line()
+      .x(function (d) {
+        return xScale(d.date);
+      })
+      .y(function (d) {
+        return yScale(d.total);
+      })
+      .curve(d3.curveCatmullRom.alpha(0.5));
+
+    // Defining the line path and adding some styles
+    const path = svg
+      .append("path")
+      .attr("d", line(Datedata1))
+      .attr("stroke-width", "2")
+      .style("fill", "none")
+      .attr("stroke", "green");
+
+    // const path2 = svg
+    //   .append("path")
+    //   .attr("d", line(parsedData2?.[0]?.values))
+    //   .attr("stroke-width", "2")
+    //   .style("fill", "none")
+    //   .attr("stroke", "yellow");
+
+    // Create a selection for circles
+    const circles = svg
+      .selectAll(".circle")
+      .data(Datedata1)
+      .enter()
+      .append("circle")
+      .attr("class", "circle")
+      .attr("cx", (d) => xScale(d.date))
+      .attr("cy", (d) => yScale(d.total))
+      .attr("r", 5) // Radius of the circle
+      .attr("fill", "red"); // Color of the circle
+
+    // const circles2 = svg
+    //   .selectAll(".circle2")
+    //   .data(parsedData2?.[0]?.values)
+    //   .enter()
+    //   .append("circle")
+    //   .attr("class", "circle2")
+    //   .attr("cx", (d) => xScale(d.date))
+    //   .attr("cy", (d) => yScale(d.total))
+    //   .attr("r", 5) // Radius of the circle
+    //   .attr("fill", "blue"); // Color of the circle
+
+    // Adding the x Axis
+    // svg
+    //   .append("g")
+    //   .attr("transform", "translate(0," + height + ")")
+    //   .call(
+    //     d3
+    //       .axisBottom(xScale)
+    //       .tickSize(0)
+    //       .tickPadding(10)
+    //       .tickValues([1, 2, 3, 4])
+    //       .tickFormat((d) => {
+    //         if (d === 1) return "1-7";
+    //         if (d === 2) return "9-16";
+    //         if (d === 3) return "17-24";
+    //         if (d === 4) return "24-31";
+    //       })
+    //   );
+    // Adding the x Axis
+    // svg
+    //   .append("g")
+    //   .attr("transform", "translate(0," + height + ")")
+    //   .call(
+    //     d3
+    //       .axisBottom(xScale)
+    //       .tickSize(0)
+    //       .tickPadding(10)
+    //       .tickValues([1, 2, 3])
+    //       .tickFormat((d) => {
+    //         if (d === 1) return "august";
+    //         if (d === 2) return "july";
+    //         if (d === 3) return "june";
+    //       })
+    //   );
+
+    // Adding the x Axis
+    // svg
+    //   .append("g")
+    //   .attr("transform", "translate(0," + height + ")")
+    //   .call(
+    //     d3
+    //       .axisBottom(xScale)
+    //       .tickSize(0)
+    //       .tickPadding(10)
+    //       .tickValues([1, 2, 3, 4, 5, 6])
+    //       .tickFormat((d) => {
+    //         if (d === 1) return "august";
+    //         if (d === 2) return "july";
+    //         if (d === 3) return "june";
+    //         if (d === 4) return "May";
+    //         if (d === 5) return "April";
+    //         if (d === 6) return "March";
+    //       })
+    //   );
+
+    // Adding the x Axis
+    // svg
+    //   .append("g")
+    //   .attr("transform", "translate(0," + height + ")")
+    //   .call(
+    //     d3
+    //       .axisBottom(xScale)
+    //       .tickSize(0)
+    //       .tickPadding(10)
+    //       .tickValues([1, 2, 3, 4])
+    //       .tickFormat((d) => {
+    //         if (d === 1) return "1-7";
+    //         if (d === 2) return "9-16";
+    //         if (d === 3) return "17-24";
+    //         if (d === 4) return "24-31";
+    //       })
+    //   );
+
+    svg
+      .append("g")
+      .attr("transform", "translate(0," + height + ")")
+      .call(
+        d3
+          .axisBottom(xScale)
+          .tickSize(0)
+          .tickPadding(10)
+          .tickValues([1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12])
+          .tickFormat((d) => {
+            if (d === 1) return "august";
+            if (d === 2) return "july";
+            if (d === 3) return "june";
+            if (d === 4) return "May";
+            if (d === 5) return "April";
+            if (d === 6) return "March";
+            if (d === 7) return "feb";
+            if (d === 8) return "jan";
+            if (d === 9) return "dec";
+            if (d === 10) return "nov";
+            if (d === 11) return "oct";
+            if (d === 12) return "sept";
+          })
+      );
+
+    // Adding the y Axis
+    svg.append("g").call(d3.axisLeft(yScale).tickSize(0).tickPadding(10));
+  }, [selectedDuration]);
+  return (
+    <>
+      <div className="chart-wrapper">
+        <div id="line-chart" className="chart"></div>
+      </div>
+      <label>
+        Select Time Duration:
+        <select
+          value={selectedDuration}
+          onChange={(e) => setSelectedDuration(e.target.value)}
+        >
+          <option value="3months">Last 3 Months</option>
+          <option value="6months">Last 6 Months</option>
+          <option value="12months">Last 12 Months</option>
+          <option value="thismonth">This Month</option>
+          <option value="lastmonth">Last Month</option>
+          <option value="thisyear">This Year</option>
+        </select>
+      </label>
+    </>
+  );
+}
+
+
+
+
+// EXAMPLE 3:
+// Nothing is being displayed for this example
+
+import * as d3 from "d3";
+
+export default function App() {
+  const data = [81, 99, 200, 600, 800];
+  const width = 500;
+  const height = 300;
+  const svg = d3
+    .select("svg")
+    .attr("width", width)
+    .attr("height", height)
+    .style("background-color", "blue");
+  const xScale = d3
+    .scaleLinear()
+    .domain([0, d3.max(data)])
+    .range([0, width]);
+  const yScale = d3
+    .scaleLinear()
+    .domain([0, d3.max(data)])
+    .range([height, 0]);
+  const xAxis = d3.axisBottom().scale(xScale);
+  const yAxis = d3.axisLeft().scale(yScale);
+
+  svg.append("g").attr("transform", "translate(50, 10)").call(yAxis);
+
+  const xAxisTranslate = height - 20;
+
+  svg
+    .append("g")
+    .attr("transform", "translate(50, " + xAxisTranslate + ")")
+    .call(xAxis);
+
+  return (
+    <div className="App">
+      <svg></svg>
+    </div>
+  );
+}
+
+
+

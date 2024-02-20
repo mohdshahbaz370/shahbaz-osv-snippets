@@ -4,6 +4,30 @@ import { useTranslation } from "react-i18next";
 import moment from "moment";
 import { useSelector } from "react-redux";
 
+      // This down-commented code is line graph data for plotting in this budget graph 
+      // sample graph data for the below-mentioned code:  
+      //      [{ date: "2020/01/01", balance: 290 },
+      //      { date: "2020/07/01", balance: 230 },
+      //      { date: "2022/11/01", balance: 270 }]  
+      // const parseTime = d3.timeParse("%Y/%m/%d");      
+      // const parsedGraphIncomeData =
+      //   budgetDashboard?.data?.income?.linearGrphData.map((key: any) => ({
+      //     balance: key?.balance,
+      //     date: parseTime(key?.date),
+      //   }));
+
+      // const parsedGraphExpenseData =
+      //   budgetDashboard?.data?.expense?.linearGrphData.map((key: any) => ({
+      //     balance: key?.balance,
+      //     date: parseTime(key?.date),
+      //   }));
+      // setIncExpYAxisLabelsGraph([...parsedGraphIncomeData, ...parsedGraphExpenseData]);
+      // setIncomeLineGraphData(parsedGraphIncomeData);
+      // setExpenseLineGraphData(parsedGraphExpenseData);
+      // setIsIncExpGraph(true);
+      // setIncomeCurrency(budgetDashboard?.data?.income?.currency);
+      // setExpenseCurrency(budgetDashboard?.data?.expense?.currency);
+
 const BudgetLineChart = (props: any) => {
   const {
     isIncExpGraph,

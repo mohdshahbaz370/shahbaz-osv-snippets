@@ -1,0 +1,389 @@
+import React, { useState, useCallback, useEffect, useMemo } from "react";
+import { ICRAExport } from "../credit_check/hooks/useCRADashboard";
+import { useSelector } from "react-redux";
+import { useTranslation } from "react-i18next";
+import * as d3 from "d3";
+import moment from "moment";
+interface IProps {
+  craDetails: ICRAExport;
+  from?: "incomeInsight" | "";
+}
+
+const IncomeFrequency = (props: IProps) => {
+  const { craDetails, from = "" } = props;
+  const [data1, setData1] = useState([
+    { month: "2024/01/01", amount: 20 },
+    { month: "2023/10/01", amount: 0 },
+  ]);
+  const [data2, setData2] = useState([
+    { month: "2023/10/01", amount: 0 },
+    { month: "2023/11/01", amount: 50 },
+  ]);
+
+  const [state, setState] = useState({
+    lastMonth: {
+      month: "Jan 24",
+      amount: 20,
+    },
+    avgMonth: {
+      month: 10,
+      amount: 50,
+    },
+  });
+
+  const maxAmount = useMemo(() => {
+    const lastMonthAmount = state?.lastMonth?.amount;
+    const avergeMonthAmount = state?.avgMonth?.amount;
+    if (lastMonthAmount > avergeMonthAmount) return lastMonthAmount;
+    else return avergeMonthAmount;
+  }, [state?.lastMonth?.amount, state?.avgMonth?.amount]);
+
+  // Parsing timestamps
+  const parseTime = d3.timeParse("%Y/%m/%d");
+  const parsedData1 = data1.map((key) => ({
+    amount: key?.amount,
+    month: parseTime(key.month?.toString()),
+  }));
+  const parsedData2 = data2.map((key) => ({
+    amount: key?.amount,
+    month: parseTime(key.month?.toString()),
+  }));
+  const { t, i18n } = useTranslation();
+  const hamburger = useSelector((state: any) => state?.userLogout?.hamburger);
+  const drawControlRef = useCallback(
+    (node) => {
+      if (node !== null) {
+        const mediaQuery1536Max = window.matchMedia("(max-width: 1536px)");
+        const mediaQuery1440Max = window.matchMedia("(max-width: 1440px)");
+        const mediaQuery1336Max = window.matchMedia("(max-width: 1336px)");
+        const mediaQuery1280Max = window.matchMedia("(max-width: 1280px)");
+        const mediaQuery1170Max = window.matchMedia("(max-width: 1170px)");
+        let deviceWidth = 500; //default device width;
+        if (mediaQuery1536Max.matches) {
+          deviceWidth = hamburger ? 480 : 600;
+        }
+        if (mediaQuery1440Max.matches) {
+          deviceWidth = hamburger ? 387 : 448;
+        }
+        if (mediaQuery1336Max.matches) {
+          deviceWidth = hamburger ? 340 : 410;
+        }
+        if (mediaQuery1280Max.matches) {
+          deviceWidth = hamburger ? 330 : 390;
+        }
+        if (mediaQuery1170Max.matches) {
+          deviceWidth = hamburger ? 290 : 355;
+        } else {
+          width = 300;
+        }
+        // set the dimensions and margins of the graph
+        var margin = { top: 10, right: 50, bottom: 20, left: 30 },
+          width = deviceWidth - margin.left - margin.right,
+          height = 290 - margin.top - margin.bottom;
+
+        // append the svg object to the body of the page
+        d3.select("#lineGraph").selectAll("*").remove(); //To avoid multiple graphs
+
+        const scale = i18n.language === "en" ? 1 : -1; // checking arabic to mirror the SVG
+        let transformWidth = i18n.language === "en" ? margin.left : width + 20; // if arabic need to have more width
+        const tooltip = d3.select("#lineChartTooltip");
+        var svg = d3
+          .select("#lineGraph")
+          .append("svg")
+          .attr("width", width + margin.left + margin.right)
+          .attr("height", height + margin.top + margin.bottom)
+          .append("g")
+          // .attr(
+          //   "transform",
+          //   "translate(" + margin.left + "," + margin.top + ")"
+          // )
+
+          .attr(
+            "transform",
+            "translate(" +
+              transformWidth +
+              "," +
+              margin.top +
+              ") scale(" +
+              scale +
+              ", 1)"
+          );
+
+        //Gradient colors for lines
+        const gradient1 = svg
+          .append("defs")
+          .append("linearGradient")
+          .attr("id", "gradient1")
+          .attr("spreadMethod", "pad");
+
+        const gradient4 = svg
+          .append("defs")
+          .append("linearGradient")
+          .attr("id", "gradient4")
+          .attr("spreadMethod", "pad");
+
+        gradient1
+          .append("stop")
+          .attr("offset", "0%")
+          .attr("stop-color", "#eb8b2d")
+          .attr("stop-opacity", 1);
+
+        gradient1
+          .append("stop")
+          .attr("offset", "100%")
+          .attr("stop-color", "#fff")
+          .attr("stop-opacity", 1);
+
+        gradient4
+          .append("stop")
+          .attr("offset", "0%")
+          .attr("stop-color", "#8994a5")
+          .attr("stop-opacity", 1);
+
+        gradient4
+          .append("stop")
+          .attr("offset", "100%")
+          .attr("stop-color", "#fff")
+          .attr("stop-opacity", 1);
+
+        const xScale = d3
+          .scaleTime()
+          .domain([
+            new Date(moment().subtract(4, "months").format()),
+            new Date(moment().subtract(1, "months").format()),
+          ])
+          .range([0, width]);
+
+        // start first tick from the origin
+        xScale.nice(d3.timeMonth);
+
+        const yScale = d3
+          .scaleLinear()
+          .domain([0, (maxAmount / 100) * 25 + maxAmount])
+          .range([height, 0]);
+
+        // gridlines in y axis function
+        function make_y_gridlines() {
+          return d3.axisLeft(yScale).ticks(5);
+        }
+
+        // add the Y gridlines
+        svg
+          .append("g")
+          .attr("class", "grid")
+          .style("stroke-dasharray", "3, 3")
+          .call(make_y_gridlines().tickSize(-width).tickFormat(""));
+
+        const xScale2 = d3
+          .scaleTime()
+          .domain([
+            new Date(moment().subtract(4, "months").format()),
+            new Date(moment().subtract(1, "months").format()),
+          ])
+          .range([0, width]);
+
+        // start first tick from the origin
+        xScale2.nice(d3.timeMonth);
+
+        const yScale2 = d3
+          .scaleLinear()
+          .domain([0, (maxAmount / 100) * 25 + maxAmount])
+          .range([height, 0]);
+
+        // Drawing line with inner gradient and area
+        // Adding functionality to make line and area curved
+        const line = d3
+          .line()
+          .x(function (d) {
+            return xScale(d.month);
+          })
+          .y(function (d) {
+            return yScale(d.amount);
+          })
+          .curve(d3.curveCatmullRom.alpha(0.5));
+
+        const line2 = d3
+          .line()
+          .x(function (d) {
+            return xScale2(d.month);
+          })
+          .y(function (d) {
+            return yScale2(d.amount);
+          })
+          .curve(d3.curveCatmullRom.alpha(0.5));
+
+        const path = svg
+          .append("path")
+          .attr("d", line(parsedData1))
+          .attr("stroke-width", "4")
+          .style("fill", "none")
+          .attr("stroke", "url(#gradient1)");
+        // .attr("opacity", "0.3");
+
+        // Create a selection for circles
+        const circles = svg
+          .selectAll(".circle")
+          .data(parsedData1)
+          .enter()
+          .append("circle")
+          .attr("class", "circle Cursor")
+          .attr("cx", (d, i) => (i === 1 ? -500 : xScale(d.month))) // Use a large negative value for the first tick to hide the circle
+          .attr("cy", (d, i) => (i === 1 ? -500 : yScale(d.amount))) // Use a large negative value for the first tick to hide the circle
+          .attr("r", 5) // Radius of the circle
+          .attr("fill", "#eb8b2d")
+          .attr("opacity", "0.3")
+          .on("mouseover", function (d) {
+            d3.select("#lineChartTooltip")
+              .html(function () {
+                return `<p class="budgetBalGraph">SAR ${d.amount}</p>`;
+              })
+              .transition()
+              .duration(0)
+              .on("end", function () {
+                d3.select(this)
+                  .attr("class", "tooltip1")
+                  .style("opacity", 1)
+                  .style("display", "block")
+                  .style(
+                    "left",
+                    i18n.language === "en"
+                      ? xScale(d.month) - 18 + "px"
+                      : xScale(d.month) - 270 + "px"
+                  )
+                  .style(
+                    "top",
+                    i18n.language === "en"
+                      ? yScale(d.amount) - 39 + "px"
+                      : yScale(d.amount) - 45 + "px"
+                  );
+              });
+          })
+
+          .on("mouseout", function () {
+            d3.select("#lineChartTooltip")
+              .transition()
+              .duration(250)
+              .style("opacity", 0);
+          });
+        // .on("mousemove", function () {
+        //   d3.select("#lineChartTooltip")
+        //     .style("left", d3.event.pageX - 50 + "px")
+        //     .style("top", d3.event.pageY - 80 + "px");
+        // });
+
+        const path2 = svg
+          .append("path")
+          .attr("d", line2(parsedData2))
+          .attr("stroke-width", "4")
+          .style("fill", "none")
+          .attr("stroke", "url(#gradient4)");
+        // .attr("opacity", "0.3");
+
+        const circles2 = svg
+          .selectAll(".circle2")
+          .data(parsedData2)
+          .enter()
+          .append("circle")
+          .attr("class", "circle2 Cursor")
+          .attr("cx", (d, i) => (i === 0 ? -500 : xScale2(d.month))) // Use a large negative value for the first tick to hide the circle
+          .attr("cy", (d, i) => (i === 0 ? -500 : yScale2(d.amount))) // Use a large negative value for the first tick to hide the circle
+          .attr("r", 5) // Radius of the circle
+          .attr("fill", "#8994a5") // Color of the circle
+          .attr("opacity", "0.3")
+          .on("mouseover", function (d) {
+            d3.select("#lineChartTooltip")
+              .html(function () {
+                return `<p class="budgetBalGraph">SAR ${d.amount}</p>`;
+              })
+              .transition()
+              .duration(0)
+              .on("end", function () {
+                d3.select(this)
+                  .attr("class", "tooltip1 incomeToolTipFreq")
+                  .style("opacity", 1)
+                  .style("display", "block")
+                  .style(
+                    "left",
+                    i18n.language === "en"
+                      ? xScale(d.month) - 18 + "px"
+                      : xScale(d.month) + 245 + "px"
+                  )
+                  .style(
+                    "top",
+                    i18n.language === "en"
+                      ? yScale(d.amount) - 39 + "px"
+                      : yScale(d.amount) - 45 + "px"
+                  );
+              });
+          })
+          .on("mouseout", function () {
+            d3.select("#lineChartTooltip")
+              .transition()
+              .duration(250)
+              .style("opacity", 0);
+          });
+        // .on("mousemove", function () {
+        //   d3.select("#lineChartTooltip")
+        //     .style("left", d3.event.pageX - 50 + "px")
+        //     .style("top", d3.event.pageY - 80 + "px");
+        // });
+
+        // Adding the x Axis
+        const xAxis = svg
+          .append("g")
+          .attr("transform", "translate(0," + height + ")")
+          .call(
+            d3
+              .axisBottom(xScale)
+              .ticks(3)
+              .tickFormat((d: any) => moment(d).format("MMM"))
+          );
+        // .selectAll("text")
+        // .style("fill", "#8994a5");
+
+        // Hide axis line and ticks with labels
+        xAxis.select(".domain").style("display", "none"); // Hide axis line
+        xAxis.selectAll(".tick text").style("display", "none"); // Hide ticks with labels
+        xAxis.selectAll(".tick line").style("display", "none"); // Hide tick lines
+        // Adding the y Axis
+        const yAxis = svg.append("g").call(d3.axisLeft(yScale).ticks(5));
+        // .selectAll("text")
+        // .style("fill", "#8994a5");
+
+        // Hide axis line and ticks with labels
+        yAxis.select(".domain").style("display", "none"); // Hide axis line
+        yAxis.selectAll(".tick text").style("display", "none"); // Hide ticks with labels
+        yAxis.selectAll(".tick line").style("display", "none"); // Hide tick lines
+      }
+    },
+    [i18n.language, hamburger]
+  );
+  return (
+    <div className="creditWtCard w-48">
+      <div>
+        <div className="isFlex spacing cashPerformance noWrap">
+          <div className="fs-20 font-Heavy pb-1 w-50">
+            Total income frequency
+          </div>
+          <div className="cashPerformanceLegends">
+            {/* <span className="newDateRange">{getdates()}</span> */}
+            <span className="isFlex justifyEnd">
+              <span className="thisWeekTxt">Last month</span>
+              <span className="lastWeekTxt">Avg. Last 3 Month</span>
+            </span>
+          </div>
+        </div>
+        <div className="accessColor pb-1">Total balance available</div>
+        <div className="font-Heavy fs-20">SAR 5.1M</div>
+      </div>
+      {/* <div className="isFlex spacing">
+            </div> */}
+      <div className="graph-container">
+        <div id="lineGraph" ref={drawControlRef}></div>
+        <div id="lineChartTooltip"></div>
+      </div>
+    </div>
+  );
+};
+
+export default IncomeFrequency;
