@@ -4,6 +4,10 @@ import { useSelector } from "react-redux";
 import { useTranslation } from "react-i18next";
 import * as d3 from "d3";
 import moment from "moment";
+import { millify } from "../../../utils/roleHelper";
+import AnalyticsPieChartLoader from "../../analytics/loaders/AnalyticsPieChart.loader";
+
+const currencyFormatter = require("currency-formatter");
 interface IProps {
   craDetails: ICRAExport;
   from?: "incomeInsight" | "";
@@ -11,43 +15,66 @@ interface IProps {
 
 const IncomeFrequency = (props: IProps) => {
   const { craDetails, from = "" } = props;
-  const [data1, setData1] = useState([
-    { month: "2024/01/01", amount: 20 },
-    { month: "2023/10/01", amount: 0 },
-  ]);
-  const [data2, setData2] = useState([
-    { month: "2023/10/01", amount: 0 },
-    { month: "2023/11/01", amount: 50 },
-  ]);
 
-  const [state, setState] = useState({
-    lastMonth: {
-      month: "Jan 24",
-      amount: 20,
-    },
-    avgMonth: {
-      month: 10,
-      amount: 50,
-    },
-  });
+  const state = useMemo(() => {
+    return craDetails?.dashboardDetail?.data?.incomeInsights?.incomeFrequency;
+  }, [craDetails?.dashboardDetail?.data?.incomeInsights?.incomeFrequency]);
 
-  const maxAmount = useMemo(() => {
-    const lastMonthAmount = state?.lastMonth?.amount;
-    const avergeMonthAmount = state?.avgMonth?.amount;
-    if (lastMonthAmount > avergeMonthAmount) return lastMonthAmount;
-    else return avergeMonthAmount;
-  }, [state?.lastMonth?.amount, state?.avgMonth?.amount]);
+  const maxAmount = Math.max(
+      state?.lastMonth?.one,
+      state?.lastMonth?.eight,
+      state?.lastMonth?.sixteen,
+      state?.lastMonth?.twentyFour,
+      state?.last3MonthAvg?.one,
+      state?.last3MonthAvg?.eight,
+      state?.last3MonthAvg?.sixteen,
+      state?.last3MonthAvg?.twentyFour
+    );
 
-  // Parsing timestamps
-  const parseTime = d3.timeParse("%Y/%m/%d");
-  const parsedData1 = data1.map((key) => ({
-    amount: key?.amount,
-    month: parseTime(key.month?.toString()),
-  }));
-  const parsedData2 = data2.map((key) => ({
-    amount: key?.amount,
-    month: parseTime(key.month?.toString()),
-  }));
+  const parsedData1 = useMemo(
+    () => [
+      {
+        amount: state?.lastMonth?.one,
+        date: 0,
+      },
+      {
+        amount: state?.lastMonth?.eight,
+        date: 1,
+      },
+      {
+        amount: state?.lastMonth?.sixteen,
+        date: 2,
+      },
+      {
+        amount: state?.lastMonth?.twentyFour,
+        date: 3,
+      },
+    ],
+    [state]
+  );
+
+  const parsedData2 = useMemo(
+    () => [
+      {
+        amount: state?.last3MonthAvg?.one,
+        date: 0,
+      },
+      {
+        amount: state?.last3MonthAvg?.eight,
+        date: 1,
+      },
+      {
+        amount: state?.last3MonthAvg?.sixteen,
+        date: 2,
+      },
+      {
+        amount: state?.last3MonthAvg?.twentyFour,
+        date: 3,
+      },
+    ],
+    [state]
+  );
+
   const { t, i18n } = useTranslation();
   const hamburger = useSelector((state: any) => state?.userLogout?.hamburger);
   const drawControlRef = useCallback(
@@ -60,7 +87,7 @@ const IncomeFrequency = (props: IProps) => {
         const mediaQuery1170Max = window.matchMedia("(max-width: 1170px)");
         let deviceWidth = 500; //default device width;
         if (mediaQuery1536Max.matches) {
-          deviceWidth = hamburger ? 480 : 600;
+          deviceWidth = hamburger ? 520 : 600;
         }
         if (mediaQuery1440Max.matches) {
           deviceWidth = hamburger ? 387 : 448;
@@ -85,7 +112,7 @@ const IncomeFrequency = (props: IProps) => {
         d3.select("#lineGraph").selectAll("*").remove(); //To avoid multiple graphs
 
         const scale = i18n.language === "en" ? 1 : -1; // checking arabic to mirror the SVG
-        let transformWidth = i18n.language === "en" ? margin.left : width + 20; // if arabic need to have more width
+        let transformWidth = i18n.language === "en" ? margin.left + margin.top : width + 20; // if arabic need to have more width
         const tooltip = d3.select("#lineChartTooltip");
         var svg = d3
           .select("#lineGraph")
@@ -130,6 +157,12 @@ const IncomeFrequency = (props: IProps) => {
 
         gradient1
           .append("stop")
+          .attr("offset", "50%")
+          .attr("stop-color", "#F1AC69")
+          .attr("stop-opacity", 1);
+
+        gradient1
+          .append("stop")
           .attr("offset", "100%")
           .attr("stop-color", "#fff")
           .attr("stop-opacity", 1);
@@ -139,6 +172,12 @@ const IncomeFrequency = (props: IProps) => {
           .attr("offset", "0%")
           .attr("stop-color", "#8994a5")
           .attr("stop-opacity", 1);
+        
+        gradient4
+          .append("stop")
+          .attr("offset", "50%")
+          .attr("stop-color", "#B6BDC7")
+          .attr("stop-opacity", 1);
 
         gradient4
           .append("stop")
@@ -146,16 +185,11 @@ const IncomeFrequency = (props: IProps) => {
           .attr("stop-color", "#fff")
           .attr("stop-opacity", 1);
 
-        const xScale = d3
-          .scaleTime()
-          .domain([
-            new Date(moment().subtract(4, "months").format()),
-            new Date(moment().subtract(1, "months").format()),
-          ])
-          .range([0, width]);
+        // const xScale = d3.scaleLinear().domain([0, 4]).range([0, width]);
+        const xScale = d3.scaleLinear().domain([-0.25, 3]).range([0, width]);
 
         // start first tick from the origin
-        xScale.nice(d3.timeMonth);
+        // xScale.nice(d3.timeMonth);
 
         const yScale = d3
           .scaleLinear()
@@ -174,16 +208,11 @@ const IncomeFrequency = (props: IProps) => {
           .style("stroke-dasharray", "3, 3")
           .call(make_y_gridlines().tickSize(-width).tickFormat(""));
 
-        const xScale2 = d3
-          .scaleTime()
-          .domain([
-            new Date(moment().subtract(4, "months").format()),
-            new Date(moment().subtract(1, "months").format()),
-          ])
-          .range([0, width]);
+        // const xScale2 = d3.scaleLinear().domain([0, 4]).range([0, width]);
+        const xScale2 = d3.scaleLinear().domain([-0.25, 3]).range([0, width]);
 
         // start first tick from the origin
-        xScale2.nice(d3.timeMonth);
+        // xScale2.nice(d3.timeMonth);
 
         const yScale2 = d3
           .scaleLinear()
@@ -195,7 +224,7 @@ const IncomeFrequency = (props: IProps) => {
         const line = d3
           .line()
           .x(function (d) {
-            return xScale(d.month);
+            return xScale(d.date);
           })
           .y(function (d) {
             return yScale(d.amount);
@@ -205,7 +234,7 @@ const IncomeFrequency = (props: IProps) => {
         const line2 = d3
           .line()
           .x(function (d) {
-            return xScale2(d.month);
+            return xScale2(d.date);
           })
           .y(function (d) {
             return yScale2(d.amount);
@@ -227,15 +256,20 @@ const IncomeFrequency = (props: IProps) => {
           .enter()
           .append("circle")
           .attr("class", "circle Cursor")
-          .attr("cx", (d, i) => (i === 1 ? -500 : xScale(d.month))) // Use a large negative value for the first tick to hide the circle
-          .attr("cy", (d, i) => (i === 1 ? -500 : yScale(d.amount))) // Use a large negative value for the first tick to hide the circle
+          // .attr("cx", (d, i) => (i === 1 ? -500 : xScale(d.date))) // Use a large negative value for the first tick to hide the circle
+          // .attr("cy", (d, i) => (i === 1 ? -500 : yScale(d.amount))) // Use a large negative value for the first tick to hide the circle
+          .attr("cx", (d, i) => (xScale(d.date)))
+          .attr("cy", (d, i) => (yScale(d.amount)))
           .attr("r", 5) // Radius of the circle
           .attr("fill", "#eb8b2d")
           .attr("opacity", "0.3")
           .on("mouseover", function (d) {
             d3.select("#lineChartTooltip")
               .html(function () {
-                return `<p class="budgetBalGraph">SAR ${d.amount}</p>`;
+                return `<p class="budgetBalGraph">SAR ${millify(
+                  d.amount,
+                  true
+                )}</p>`;
               })
               .transition()
               .duration(0)
@@ -246,15 +280,15 @@ const IncomeFrequency = (props: IProps) => {
                   .style("display", "block")
                   .style(
                     "left",
-                    i18n.language === "en"
-                      ? xScale(d.month) - 18 + "px"
-                      : xScale(d.month) - 270 + "px"
+                    i18n.language === "en" ? xScale(d.date) - 26 + "px" : "auto"
+                  )
+                  .style(
+                    "right",
+                    i18n.language === "ar" ? xScale(d.date) - 5 + "px" : "auto"
                   )
                   .style(
                     "top",
-                    i18n.language === "en"
-                      ? yScale(d.amount) - 39 + "px"
-                      : yScale(d.amount) - 45 + "px"
+                    yScale(d.amount) - (i18n.language === "en" ? 39 : 45) + "px"
                   );
               });
           })
@@ -285,15 +319,20 @@ const IncomeFrequency = (props: IProps) => {
           .enter()
           .append("circle")
           .attr("class", "circle2 Cursor")
-          .attr("cx", (d, i) => (i === 0 ? -500 : xScale2(d.month))) // Use a large negative value for the first tick to hide the circle
-          .attr("cy", (d, i) => (i === 0 ? -500 : yScale2(d.amount))) // Use a large negative value for the first tick to hide the circle
+          // .attr("cx", (d, i) => (i === 0 ? -500 : xScale2(d.date))) // Use a large negative value for the first tick to hide the circle
+          // .attr("cy", (d, i) => (i === 0 ? -500 : yScale2(d.amount))) // Use a large negative value for the first tick to hide the circle
+          .attr("cx", (d, i) => (xScale2(d.date)))
+          .attr("cy", (d, i) => (yScale2(d.amount)))
           .attr("r", 5) // Radius of the circle
           .attr("fill", "#8994a5") // Color of the circle
           .attr("opacity", "0.3")
           .on("mouseover", function (d) {
             d3.select("#lineChartTooltip")
               .html(function () {
-                return `<p class="budgetBalGraph">SAR ${d.amount}</p>`;
+                return `<p class="budgetBalGraph">SAR ${millify(
+                  d.amount,
+                  true
+                )}</p>`;
               })
               .transition()
               .duration(0)
@@ -304,15 +343,15 @@ const IncomeFrequency = (props: IProps) => {
                   .style("display", "block")
                   .style(
                     "left",
-                    i18n.language === "en"
-                      ? xScale(d.month) - 18 + "px"
-                      : xScale(d.month) + 245 + "px"
+                    i18n.language === "en" ? xScale(d.date) - 25 + "px" : "auto"
+                  )
+                  .style(
+                    "right",
+                    i18n.language === "ar" ? xScale(d.date) - 5  + "px" : "auto"
                   )
                   .style(
                     "top",
-                    i18n.language === "en"
-                      ? yScale(d.amount) - 39 + "px"
-                      : yScale(d.amount) - 45 + "px"
+                    yScale(d.amount) - (i18n.language === "en" ? 39 : 45) + "px"
                   );
               });
           })
@@ -335,53 +374,79 @@ const IncomeFrequency = (props: IProps) => {
           .call(
             d3
               .axisBottom(xScale)
-              .ticks(3)
-              .tickFormat((d: any) => moment(d).format("MMM"))
-          );
-        // .selectAll("text")
-        // .style("fill", "#8994a5");
+              .ticks(4)
+              .tickSize(0)
+              .tickPadding(hamburger ? 11 :13)
+              .tickFormat((d: any) => {
+                if (d === 0) return "1 - 7";
+                else if (d === 1) return "8 - 15";
+                else if (d === 2) return "16 - 23";
+                else if (d === 3) return "24 - 31";
+              })
+          )
+          .selectAll("text")
+          .style("fill", "#8994a5");
 
         // Hide axis line and ticks with labels
         xAxis.select(".domain").style("display", "none"); // Hide axis line
-        xAxis.selectAll(".tick text").style("display", "none"); // Hide ticks with labels
-        xAxis.selectAll(".tick line").style("display", "none"); // Hide tick lines
+        // xAxis.selectAll(".tick text").style("display", "none"); // Hide ticks with labels
+        // xAxis.selectAll(".tick line").style("display", "none"); // Hide tick lines
         // Adding the y Axis
-        const yAxis = svg.append("g").call(d3.axisLeft(yScale).ticks(5));
-        // .selectAll("text")
-        // .style("fill", "#8994a5");
+        const yAxis = svg
+          .append("g")
+          .call(
+            d3
+              .axisLeft(yScale)
+              .ticks(4)
+              .tickSize(0)
+              .tickPadding(i18n.language === "en" ? 13 : 0)
+              .tickFormat((d: any) => {
+                if (d === 0) return "";
+                else return millify(d, true);
+              })
+          )
+          .selectAll("text")
+          .style("fill", "#8994a5");
 
         // Hide axis line and ticks with labels
-        yAxis.select(".domain").style("display", "none"); // Hide axis line
-        yAxis.selectAll(".tick text").style("display", "none"); // Hide ticks with labels
-        yAxis.selectAll(".tick line").style("display", "none"); // Hide tick lines
+        // yAxis.select(".domain").style("display", "none"); // Hide axis line
+        // yAxis.selectAll(".tick text").style("display", "none"); // Hide ticks with labels
+        // yAxis.selectAll(".tick line").style("display", "none"); // Hide tick lines
       }
     },
-    [i18n.language, hamburger]
+    [i18n.language, hamburger, parsedData1, parsedData2, state, maxAmount]
   );
   return (
-    <div className="creditWtCard w-48">
+    <div className="creditWtCard w-48 incomeWhiteCard">
       <div>
         <div className="isFlex spacing cashPerformance noWrap">
           <div className="fs-20 font-Heavy pb-1 w-50">
-            Total income frequency
+            {t("totalIncomeFrequencyTxt")}
           </div>
           <div className="cashPerformanceLegends">
             {/* <span className="newDateRange">{getdates()}</span> */}
             <span className="isFlex justifyEnd">
-              <span className="thisWeekTxt">Last month</span>
-              <span className="lastWeekTxt">Avg. Last 3 Month</span>
+              <span className="thisWeekTxt">{t("lstMon")}</span>
+              <span className="lastWeekTxt">{t("avgLast3MonthTxt")}</span>
             </span>
           </div>
         </div>
-        <div className="accessColor pb-1">Total balance available</div>
-        <div className="font-Heavy fs-20">SAR 5.1M</div>
+        <div className="accessColor pb-1">{t("totalBalanceAvailableTxt")}</div>
+        <div className="font-Heavy fs-20 mb-3">{`${
+          craDetails?.dashboardDetail?.data?.overAllBalance?.currency
+        } ${currencyFormatter?.format(
+          craDetails?.dashboardDetail?.data?.overAllBalance
+            ?.TotalAvailableBalance,
+          { code: "" }
+        )}`}</div>
       </div>
-      {/* <div className="isFlex spacing">
-            </div> */}
+      {craDetails?.dashboardDetail?.loading ? <div className="cashData incomeFrequencyGraph">
+        <AnalyticsPieChartLoader />
+      </div> :
       <div className="graph-container">
         <div id="lineGraph" ref={drawControlRef}></div>
         <div id="lineChartTooltip"></div>
-      </div>
+      </div>}
     </div>
   );
 };
