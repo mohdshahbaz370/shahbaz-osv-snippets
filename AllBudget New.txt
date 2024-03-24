@@ -1,0 +1,1423 @@
+import React, { useState, useEffect, useRef, useMemo } from "react";
+import { useTranslation } from "react-i18next";
+import Button from "../../../../common/button/Button";
+import Select from "react-select";
+import SelectStyle from "../../../../config/select";
+import SliderPopup from "../../../payments/features/SliderPopup";
+import AddBudget from "./AddBudget";
+import moment from "moment";
+import { useSelector, useDispatch } from "react-redux";
+import { ActionTypesFactory } from "../../../api_user/Helper";
+import { getUserFromStore, getCompanyId, grantModuleAccess } from "../../../../utils/roleHelper";
+import BudgetLineChart from "./BudgetLineChart";
+import { millify } from "../../../../utils/roleHelper";
+import * as d3 from "d3";
+import endpoint from "../../../../apiUtil";
+import api from "../../../../api.json";
+import { toast } from "react-toastify";
+import Popup from "reactjs-popup";
+import BudgetAnalyticsLoader from "./features/BudgetAnalyticsLoader";
+import IncomeExpense from "./IncomeExpense.component";
+import BudgetSectionLoader from "./features/BudgetSectionLoader";
+
+const AllBudget = () => {
+  const { t, i18n } = useTranslation();
+  const dispatch = useDispatch();
+  const user = getUserFromStore();
+  const efmloadCategories = useSelector(
+    (state: any) => state?.obServices?.efmloadCategories
+  );
+  const budgetDashboard = useSelector(
+    (state: any) => state?.obServices?.efmbudgetDashboard
+  );
+  const [selectedOption, setSelectedOption] = useState({
+    label: "This Month",
+    value: "THM",
+  });
+  const dateMenu = useSelector(
+    (state: any) => state?.profile?.masterCurrencyData
+  );
+
+  const dateMenuList = useMemo(() => {
+    let currencyList = dateMenu?.data?.find(
+      (data: any) => data?.type === "BUDGET_TIMELINE"
+    )?.data;
+    return currencyList?.map((list: any) => {
+      return {
+        label: i18n.language === "en" ? list?.label?.en : list?.label?.ar,
+        value: list?.key,
+      };
+    });
+  }, [dateMenu]);
+
+  const [isOpenPopup, setIsOpenPopup] = useState(false);
+  const [isPeriod, setIsPeriod] = useState(() => moment().format("MMM"));
+  const [isCategAside, setIsCategAside] = useState(null);
+  const [formikRef, setFormikRef] = useState("");
+  const [isEdit, setIsEdit] = useState(false);
+  const [categAsideLabels, setCategAsideLabels] = useState({});
+  const [showTooltip, setShowTooltip] = useState({} as any);
+  const [showTooltip1, setShowTooltip1] = useState({} as any);
+  const [selectedDuration, setSelectedDuration] = useState("THM");
+  const [graphDuration, setGraphDuration] = useState("THM");
+  const [isGraphDuration, setIsGraphDuration] = useState("");
+  const toolTipRef: any = useRef(null);
+  const [incomeLineGraphData, setIncomeLineGraphData] = useState([]);
+  const [expenseLineGraphData, setExpenseLineGraphData] = useState([]);
+  const [isDownArrow, setIsDownArrow] = useState(true);
+  const [isIncExpGraph, setIsIncExpGraph] = useState(false);
+  const [isDelete, setIsDelete] = useState(false);
+  const [categoryCurrentLinearGrphData, setCategoryCurrentLinearGrphData] =
+    useState([]);
+  const [categoryPreviousLinearGrphData, setCategoryPreviousLinearGrphData] =
+    useState([]);
+  const [categoryLinearGrphData, setCategoryLinearGrphData] = useState([]);
+  const [isIncomeActive, setIsIncomeActive] = useState({} as any);
+  const [isExpenseActive, setIsExpenseActive] = useState({} as any);
+  const [categoryCurrency, setCategoryCurrency] = useState("");
+  const [incomeCurrency, setIncomeCurrency] = useState("");
+  const [expenseCurrency, setExpenseCurrency] = useState("");
+  const [durationMonth, setDurationMonth] = useState({});
+  const [isAddBudget, setIsAddBudget] = useState(false);
+  const [period, setPeriod] = useState("");
+  const [UDMDate, setUDMDate] = useState({});
+  const [incExpYAxisLabelsGraph, setIncExpYAxisLabelsGraph ] = useState([]);
+
+  const currencyFormatter = require("currency-formatter");
+
+  const displayDates = (selectedDuration: any, durationMonth?: any) => {
+    switch (selectedDuration) {
+      case "THM":
+        return moment().format("MMMM YYYY");
+      case "LSM":
+        return moment().subtract(1, "months").format("MMMM YYYY");
+      case "L3M":
+        return (
+          moment().subtract(2, "months").format("MMMM YYYY") +
+          " - " +
+          moment().format("MMMM YYYY")
+        );
+      case "L6M":
+        return (
+          moment().subtract(5, "months").format("MMMM YYYY") +
+          " - " +
+          moment().format("MMMM YYYY")
+        );
+      case "THY":
+        return (
+          moment().startOf("year").format("MMMM YYYY") +
+          " - " +
+          moment().format("MMMM YYYY")
+        );
+      case "12M":
+        return (
+          moment().subtract(11, "months").format("MMMM YYYY") +
+          " - " +
+          moment().format("MMMM YYYY")
+        );
+      case "UDM":
+        return moment(
+          durationMonth?.month + "/" + durationMonth?.year,
+          "MMM/YYYY"
+        ).format("MMMM YYYY");
+    }
+  };
+
+  useEffect(() => {
+    if(period === "UDM")
+    dispatch({
+      type: ActionTypesFactory("EFM", "BUDGET_DASHBOARD").REQUEST,
+      payload: {
+        companyId: user.fk_company_id?.[0],
+        userId: user._id,
+        startDate: checkStartDate(period, UDMDate),
+        endDate: checkEndDate(period, UDMDate),
+        timeline: selectedDuration,
+      },
+    });
+    else 
+    dispatch({
+      type: ActionTypesFactory("EFM", "BUDGET_DASHBOARD").REQUEST,
+      payload: {
+        companyId: user.fk_company_id?.[0],
+        userId: user._id,
+        startDate: checkStartDate(selectedDuration),
+        endDate: checkEndDate(selectedDuration),
+        timeline: selectedDuration,
+      },
+    });
+    dispatch({
+      type: ActionTypesFactory("EFM", "LOAD_CATEGORY").REQUEST,
+      payload: {
+        userId: user._id,
+      },
+    });
+  }, [period]);
+
+  useEffect(() => {
+    if (budgetDashboard.loading === false) {
+      const parseTime = d3.timeParse("%Y/%m/%d");
+
+      const parsedGraphIncomeData =
+        budgetDashboard?.data?.income?.linearGrphData.map((key: any) => ({
+          balance: key?.balance,
+          date: parseTime(key?.date),
+        }));
+
+      const parsedGraphExpenseData =
+        budgetDashboard?.data?.expense?.linearGrphData.map((key: any) => ({
+          balance: key?.balance,
+          date: parseTime(key?.date),
+        }));
+      setIncExpYAxisLabelsGraph([...parsedGraphIncomeData, ...parsedGraphExpenseData]);
+      setIncomeLineGraphData(parsedGraphIncomeData);
+      setExpenseLineGraphData(parsedGraphExpenseData);
+      setIsIncExpGraph(true);
+      setIncomeCurrency(budgetDashboard?.data?.income?.currency);
+      setExpenseCurrency(budgetDashboard?.data?.expense?.currency);
+    }
+  }, [
+    budgetDashboard?.data?.income?.linearGrphData,
+    budgetDashboard?.data?.expense?.linearGrphData,
+  ]);
+
+  const handleClickOutside = (event: any) => {
+    if (
+      toolTipRef?.current?.length &&
+      (toolTipRef?.current?.indexOf(event?.target) > -1 ||
+        event?.target?.className === "transcationTooltip")
+    ) {
+      return;
+    }
+    setShowTooltip({});
+    setShowTooltip1({});
+  };
+  useEffect(() => {
+    document.addEventListener("click", handleClickOutside);
+
+    return () => {
+      document.removeEventListener("click", handleClickOutside);
+    };
+  }, [showTooltip, showTooltip1]);
+
+  const checkPeriods = (period: any, duration?: any) => {
+    let previousMonths = [];
+    switch (period) {
+      case "THY":
+        let currentMonth: any = moment().format("MM");
+        currentMonth = Number(currentMonth) - 1;
+        for (let i = currentMonth; i >= 0; i--) {
+          previousMonths.push(moment().subtract(i, "months").format("MMM"));
+        }
+        break;
+      case "THM":
+        previousMonths.push(moment().format("MMM"));
+        break;
+      case "LSM":
+        for (let i = 1; i > 0; i--) {
+          previousMonths.push(moment().subtract(i, "months").format("MMM"));
+        }
+        break;
+      case "L3M":
+        for (let i = 2; i >= 0; i--) {
+          previousMonths.push(moment().subtract(i, "months").format("MMM"));
+        }
+        break;
+      case "L6M":
+        for (let i = 5; i >= 0; i--) {
+          previousMonths.push(moment().subtract(i, "months").format("MMM"));
+        }
+        break;
+      case "12M":
+        for (let i = 11; i >= 0; i--) {
+          previousMonths.push(moment().subtract(i, "months").format("MMM"));
+        }
+        break;
+      case "UDM":
+        previousMonths.push(moment(duration, "MMM").format("MMM"));
+        break;
+    }
+    return previousMonths;
+  };
+
+  const end = moment();
+  const start = moment().subtract(11, "months");
+  const dates = Array.from({ length: end.diff(start, "days") + 1 }, (_, i) =>
+    start.clone().add(i, "days")
+  );
+  const duration = Object.values(
+    dates.reduce((acc: any, date: any) => {
+      const month = moment(date).format("MMM");
+      const year = moment(date).format("YYYY");
+      const key = `${month}-${year}`;
+      if (!acc[key]) {
+        acc[key] = { month, year };
+      }
+      return acc;
+    }, {})
+  );
+
+  const checkStartDate = (period: any, duration?: any) => {
+    switch (period) {
+      case "THM":
+        return moment().startOf("month").format("YYYY-MM-DD");
+      case "LSM":
+        return moment()
+          .subtract(1, "months")
+          .startOf("month")
+          .format("YYYY-MM-DD");
+      case "L3M":
+        return moment().subtract(2, "months").format("YYYY-MM-DD");
+      case "L6M":
+        return moment().subtract(5, "months").format("YYYY-MM-DD");
+      case "THY":
+        return moment().month(0).format("YYYY-MM-DD");
+      case "12M":
+        return moment().subtract(11, "months").format("YYYY-MM-DD");
+      case "UDM":
+        return moment(duration?.month + "/" + duration?.year, "MMM/YYYY")
+          .startOf("month")
+          .format("YYYY-MM-DD");
+    }
+  };
+
+  const checkEndDate = (period: any, duration?: any) => {
+    switch (period) {
+      case "THM":
+        return moment().format("YYYY-MM-DD");
+      case "LSM":
+        return moment()
+          .subtract(1, "months")
+          .endOf("month")
+          .format("YYYY-MM-DD");
+      case "L3M":
+        return moment().format("YYYY-MM-DD");
+      case "L6M":
+        return moment().format("YYYY-MM-DD");
+      case "THY":
+        return moment().format("YYYY-MM-DD");
+      case "12M":
+        return moment().format("YYYY-MM-DD");
+      case "UDM":
+        return moment(duration?.month + "/" + duration?.year, "MMM/YYYY")
+          .endOf("month")
+          .format("YYYY-MM-DD");
+    }
+  };
+
+  const dispatchBudgetDashboardAPITags = (
+    userId: any,
+    companyId: any,
+    startDate: any,
+    endDate: any,
+    timeline: any
+  ) => {
+    dispatch({
+      type: ActionTypesFactory("EFM", "BUDGET_DASHBOARD").REQUEST,
+      payload: {
+        userId: userId,
+        companyId: companyId,
+        startDate: startDate,
+        endDate: endDate,
+        timeline: timeline,
+      },
+    });
+  };
+
+  return (
+    <div className="whitePanel lg_container">
+      <div className="container">
+        <div className="pl-25">
+          <div className="isFlex spacing alignCenter w-100">
+            <div className="isModuleTitle">
+              <h1 className="title">{t("allBudgets")}</h1>
+            </div>
+            {(grantModuleAccess("MOD-298")) && (isAddBudget || budgetDashboard?.data?.budgetList?.length) ? (
+              <div className="isFlex alignCenter isBudgetRangeSelect">
+                <Select
+                  className="selectOptionFont"
+                  isSearchable={false}
+                  value={isGraphDuration? {label: displayDates(selectedDuration, durationMonth), value: displayDates(selectedDuration, durationMonth)} : selectedOption}
+                  options={dateMenuList}
+                  styles={SelectStyle}
+                  onChange={(selectedOption: any) => {
+                    setSelectedOption(selectedOption);
+                    setIsPeriod(checkPeriods(selectedOption?.value));
+                    dispatchBudgetDashboardAPITags(
+                      user._id,
+                      user.fk_company_id?.[0],
+                      checkStartDate(selectedOption?.value),
+                      checkEndDate(selectedOption?.value),
+                      selectedOption?.value
+                    );
+                    setIsCategAside(null);
+                    setIsIncExpGraph(true);
+                    setGraphDuration(selectedOption?.value);
+                    setSelectedDuration(selectedOption?.value);
+                    setIsIncomeActive({});
+                    setIsGraphDuration("");
+                  }}
+                  placeholder={t("selectPeriod")}
+                />
+                <button
+                  className="createBtn createBtnRole btn ml-3"
+                  onClick={() => setIsOpenPopup(true)}
+                >
+                  {t("addBudget")}
+                </button>
+              </div>
+            ) : ""}
+          </div>
+          <SliderPopup
+            open={isOpenPopup}
+            closeOnDocumentClick={false}
+            closeOnEscape={false}
+            width={520}
+            lockScroll={true}
+          >
+            <AddBudget
+              setIsOpenPopup={setIsOpenPopup}
+              efmloadCategories={efmloadCategories}
+              setFormikRef={setFormikRef}
+              isEdit={isEdit}
+              setIsEdit={setIsEdit}
+              user={user}
+              categAsideLabels={categAsideLabels}
+              setIsAddBudget={setIsAddBudget}
+              setPeriod={setPeriod}
+              selectedDuration={selectedDuration}
+            />
+          </SliderPopup>
+          {budgetDashboard.loading || budgetDashboard?.data?.budgetList?.length ? (
+            <div className="overviewMain allBudgetMain mt-4">
+              <aside className="rightColumn">
+                <div className="whiteCard mb-3 budgetCalSection">
+                  <h4 className="budget-title">
+                    {displayDates(selectedDuration, durationMonth)}
+                  </h4>
+                  <div className="isFlex alignCenter budgetCal">
+                    {isPeriod &&
+                      duration?.map((duration: any) => {
+                        if (isPeriod?.includes(duration?.month)) {
+                          return (
+                            <div
+                              className="mt-2"
+                              onClick={() => {
+                                setIsPeriod(
+                                  checkPeriods("UDM", duration?.month)
+                                );
+                                dispatchBudgetDashboardAPITags(
+                                  user._id,
+                                  user.fk_company_id?.[0],
+                                  checkStartDate("UDM", {
+                                    month: duration?.month,
+                                    year: duration?.year,
+                                  }),
+                                  checkEndDate("UDM", {
+                                    month: duration?.month,
+                                    year: duration?.year,
+                                  }),
+                                  "UDM"
+                                );
+                                setUDMDate({
+                                  month: duration?.month,
+                                  year: duration?.year,
+                                });
+                                setGraphDuration("UDM");
+                                setIsCategAside(null);
+                                setSelectedDuration("UDM");
+                                setDurationMonth({
+                                  month: duration?.month,
+                                  year: duration?.year,
+                                });
+                                setIsIncomeActive({});
+                                setIsGraphDuration("UDM");
+                              }}
+                            >
+                              <div className="budgetMonth mb-1 budgetActiveM Cursor">
+                                <span>{duration?.month}</span>
+                              </div>
+                              <span className="softBlueColor">
+                                {duration?.year}
+                              </span>
+                            </div>
+                          );
+                        } else {
+                          return (
+                            <div
+                              className="mt-2"
+                              onClick={() => {
+                                setIsPeriod(
+                                  checkPeriods("UDM", duration?.month)
+                                );
+                                dispatchBudgetDashboardAPITags(
+                                  user._id,
+                                  user.fk_company_id?.[0],
+                                  checkStartDate("UDM", {
+                                    month: duration?.month,
+                                    year: duration?.year,
+                                  }),
+                                  checkEndDate("UDM", {
+                                    month: duration?.month,
+                                    year: duration?.year,
+                                  }),
+                                  "UDM"
+                                );
+                                setUDMDate({
+                                  month: duration?.month,
+                                  year: duration?.year,
+                                });
+                                setGraphDuration("UDM");
+                                setIsCategAside(null);
+                                setSelectedDuration("UDM");
+                                setDurationMonth({
+                                  month: duration?.month,
+                                  year: duration?.year,
+                                });
+                                setIsIncomeActive({});
+                                setIsGraphDuration("UDM");
+                              }}
+                            >
+                              <div className="budgetMonth mb-1 Cursor">
+                                <span>{duration?.month}</span>
+                              </div>
+                              <span>{duration?.year}</span>
+                            </div>
+                          );
+                        }
+                      })}
+                  </div>
+                </div>
+                {budgetDashboard?.data?.income?.incomeCategoryData?.length &&
+                budgetDashboard?.data?.expense?.expenseCategoryData?.length ? (
+                  <IncomeExpense
+                    budgetDashboard={budgetDashboard}
+                    isIncomeActive={isIncomeActive}
+                    setIsIncomeActive={setIsIncomeActive}
+                    setCategAsideLabels={setCategAsideLabels}
+                    categAsideLabels={categAsideLabels}
+                    setIsDownArrow={setIsDownArrow}
+                    isDownArrow={isDownArrow}
+                    setCategoryCurrency={setCategoryCurrency}
+                    setIsExpenseActive={setIsExpenseActive}
+                    isExpenseActive={isExpenseActive}
+                    setIsCategAside={setIsCategAside}
+                    isCategAside={isCategAside}
+                    setIsIncExpGraph={setIsIncExpGraph}
+                    setCategoryCurrentLinearGrphData={
+                      setCategoryCurrentLinearGrphData
+                    }
+                    setCategoryPreviousLinearGrphData={
+                      setCategoryPreviousLinearGrphData
+                    }
+                    setCategoryLinearGrphData={setCategoryLinearGrphData}
+                    showTooltip={showTooltip}
+                    setShowTooltip={setShowTooltip}
+                    showTooltip1={showTooltip1}
+                    setShowTooltip1={setShowTooltip1}
+                    toolTipRef={toolTipRef}
+                    setIsEdit={setIsEdit}
+                    setIsOpenPopup={setIsOpenPopup}
+                    formikRef={formikRef}
+                    setIsDelete={setIsDelete}
+                  />
+                ) : (
+                  budgetDashboard?.loading ? 
+                    <BudgetSectionLoader /> :
+                  <>
+                    <div className="noRecordFound errormessage mdErrorMsg mb-0">
+                      <img
+                        className="errorimage mt-2 mb-2"
+                        src={"/assets/images/no_records_available.png"}
+                        alt="logo"
+                      />
+                      <div className="clickOnButton">{t("noRecordsFound")}</div>
+                    </div>
+                  </>
+                )}
+              </aside>
+              <aside className="leftColumn">
+                {budgetDashboard?.loading ? (
+                  <BudgetAnalyticsLoader />
+                ) : (
+                  <div className="whiteCard categoryList isCashflowSection">
+                    {isIncExpGraph ? (
+                      <div className="isFlex alignCenter spacing mb-4">
+                        <h5 className="isTitle">{t("analysis")}</h5>
+                        <div className="isFlex alignCenter spacing">
+                          <div className="isFlexColumn isNetCredits">
+                            <span className="accessColor mb-10">
+                              {t("netCredits")}
+                            </span>
+                            <span className="isTotalAmount">
+                              <span className="currency">
+                                {budgetDashboard?.data?.income?.currency}
+                              </span>
+                              <span className="isValue">
+                                {budgetDashboard?.data?.income
+                                  ?.totalIncomeAmount < 10000
+                                  ? currencyFormatter.format(
+                                      budgetDashboard?.data?.income
+                                        ?.totalIncomeAmount,
+                                      { code: "" }
+                                    )
+                                  : millify(
+                                      budgetDashboard?.data?.income
+                                        ?.totalIncomeAmount,
+                                      true
+                                    )}
+                              </span>
+                            </span>
+                          </div>
+                          <div className="isFlexColumn ml-4 isExpenses">
+                            <span className="accessColor mb-10">
+                              {t("expense")}
+                            </span>
+                            <span className="isTotalAmount">
+                              <span className="currency">
+                                {budgetDashboard?.data?.expense?.currency}
+                              </span>
+                              <span className="isValue">
+                                {budgetDashboard?.data?.expense
+                                  ?.totalExpenseAmount < 10000
+                                  ? currencyFormatter.format(
+                                      budgetDashboard?.data?.expense
+                                        ?.totalExpenseAmount,
+                                      { code: "" }
+                                    )
+                                  : millify(
+                                      budgetDashboard?.data?.expense
+                                        ?.totalExpenseAmount,
+                                      true
+                                    )}
+                              </span>
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+                    ) : (
+                      <div className="isFlex alignCenter spacing mb-4">
+                        <div>
+                          <h5 className="isTitle">
+                            {categAsideLabels?.category}{" "}
+                            {categAsideLabels?.currency}{" "}
+                            {categAsideLabels?.spendAmount}
+                          </h5>
+                        </div>
+                        <div
+                          className={
+                            categAsideLabels?.isIncExpGraph === "income"
+                              ? "isNetCredits"
+                              : categAsideLabels?.isIncExpGraph === "expense"
+                              ? "isExpenses"
+                              : "isExpenses"
+                          }
+                        >
+                          <span className="accessColor displyBlock mb-10">
+                            {categAsideLabels?.isIncExpGraph === "income"
+                              ? t("netCredits")
+                              : categAsideLabels?.isIncExpGraph === "expense"
+                              ? t("expense")
+                              : t("expense")}
+                          </span>
+                          <span className="isTotalAmount">
+                            <span className="currency">SAR</span>
+                            <span className="isValue">
+                              {categAsideLabels?.isIncExpGraph === "income"
+                                ? budgetDashboard?.data?.income
+                                    ?.totalIncomeAmount < 10000
+                                  ? currencyFormatter.format(
+                                      budgetDashboard?.data?.income
+                                        ?.totalIncomeAmount,
+                                      { code: "" }
+                                    )
+                                  : millify(
+                                      budgetDashboard?.data?.income
+                                        ?.totalIncomeAmount,
+                                      true
+                                    )
+                                : categAsideLabels?.isIncExpGraph === "expense"
+                                ? budgetDashboard?.data?.expense
+                                    ?.totalExpenseAmount < 10000
+                                  ? currencyFormatter.format(
+                                      budgetDashboard?.data?.expense
+                                        ?.totalExpenseAmount,
+                                      { code: "" }
+                                    )
+                                  : millify(
+                                      budgetDashboard?.data?.expense
+                                        ?.totalExpenseAmount,
+                                      true
+                                    )
+                                : budgetDashboard?.data?.expense
+                                    ?.totalExpenseAmount < 10000
+                                ? currencyFormatter.format(
+                                    budgetDashboard?.data?.expense
+                                      ?.totalExpenseAmount,
+                                    { code: "" }
+                                  )
+                                : millify(
+                                    budgetDashboard?.data?.expense
+                                      ?.totalExpenseAmount,
+                                    true
+                                  )}
+                            </span>
+                          </span>
+                        </div>
+                      </div>
+                    )}
+                    {budgetDashboard?.loading === false && (
+                      <>
+                        {" "}
+                        <div className="cashBar">
+                          <BudgetLineChart
+                            isIncExpGraph={isIncExpGraph}
+                            categoryCurrency={categoryCurrency}
+                            incomeCurrency={incomeCurrency}
+                            expenseCurrency={expenseCurrency}
+                            categoryLinearGrphData={categoryLinearGrphData}
+                            categoryCurrentLinearGrphData={
+                              categoryCurrentLinearGrphData
+                            }
+                            categoryPreviousLinearGrphData={
+                              categoryPreviousLinearGrphData
+                            }
+                            incomeLineGraphData={incomeLineGraphData}
+                            expenseLineGraphData={expenseLineGraphData}
+                            graphDuration={graphDuration}
+                            categAsideLabels={categAsideLabels}
+                            incExpYAxisLabelsGraph={incExpYAxisLabelsGraph}
+                          />
+                        </div>
+                        {isCategAside && (
+                          <div className="mt-4">
+                            <div className="mb-2">
+                              <span className="accessColor displyBlock mb-10">
+                                Category
+                              </span>
+                              <strong className="fs-16">
+                                {i18n.language === "en"
+                                  ? categAsideLabels?.subCategoryName
+                                  : categAsideLabels?.subCategoryNameAR}
+                              </strong>
+                            </div>
+                            <div className="mb-2">
+                              <span className="accessColor displyBlock mb-10">
+                                Budget frequency
+                              </span>
+                              <strong className="fs-16">
+                                {categAsideLabels?.budgetFreqency}
+                              </strong>
+                            </div>
+                            <div className="isFlex alignCenter">
+                              <div className="w-40 mb-2">
+                                <span className="accessColor displyBlock mb-10">
+                                  Spend amount
+                                </span>
+                                <strong>
+                                  {categAsideLabels?.currency}{" "}
+                                  {categAsideLabels?.spendAmount}
+                                </strong>
+                              </div>
+                              <div className="w-40 mb-2">
+                                <span className="accessColor displyBlock mb-10">
+                                  Budget amount
+                                </span>
+                                <strong>
+                                  {categAsideLabels?.currency}{" "}
+                                  {categAsideLabels?.amount}
+                                </strong>
+                              </div>
+                            </div>
+                            <div className="mb-2">
+                              <span className="accessColor displyBlock mb-10">
+                                Description
+                              </span>
+                              <strong>{categAsideLabels?.description}</strong>
+                            </div>
+                            <div className="isFlex alignCenter pt-1">
+                              {grantModuleAccess("MOD-299") ?
+                              <Button
+                                className="rejectBtn iconActiveH"
+                                onClick={() => {
+                                  setIsOpenPopup(true);
+                                  setIsEdit(true);
+                                  // formikRef?.current?.setFieldValue(`subCategoryId`, "64378fa6a9c52f5539a64797");
+                                  formikRef?.current?.setFieldValue(
+                                    `subCategoryId`,
+                                    categAsideLabels?.subCategoryId
+                                  );
+                                  formikRef?.current?.setFieldValue(
+                                    `frequencyType`,
+                                    categAsideLabels?.budgetFreqency
+                                  );
+                                  formikRef?.current?.setFieldValue(
+                                    `frequencyDate`,
+                                    ""
+                                  );
+                                  formikRef?.current?.setFieldValue(
+                                    `amount`,
+                                    categAsideLabels?.amount
+                                  );
+                                  formikRef?.current?.setFieldValue(
+                                    `description`,
+                                    categAsideLabels?.description
+                                  );
+                                }}
+                                icon="icon-Edit"
+                                type="info"
+                              >
+                                {t("edit")}
+                              </Button> : ""
+                               }
+                              {grantModuleAccess("MOD-300") ?
+                              <Button
+                                onClick={() => setIsDelete(true)}
+                                className="rejectBtn iconActiveH m-0"
+                                icon="icon-no-fill-delete"
+                                type="info"
+                              >
+                                {t("delete")}
+                              </Button> : ""
+                              }
+                            </div>
+                          </div>
+                        )}
+                      </>
+                    )}
+                  </div>
+                )}
+              </aside>
+            </div>
+          ) 
+          : (grantModuleAccess("MOD-298") ?
+            <div className="noRecordFound isFlexColumn alignCenter isBudgetNoRecords">
+              <img
+                src="./../../../../assets/images/No-budgets-found.svg"
+                alt="No budgets found!"
+              />
+              <p>&nbsp;</p>
+              <h2 className="noDataYet">{t("noBudgetsFound")}</h2>
+              <div className="clickOnButton mb-3">
+                {t("budgetErrorMessageSubtitle")}
+              </div>
+              <button
+                className="createBtn createBtnRole btn"
+                onClick={() => setIsOpenPopup(true)}
+              >
+                {t("addBudget")}
+              </button>
+            </div>
+          : "")}
+
+          <Popup
+            open={isDelete}
+            closeOnDocumentClick={false}
+            closeOnEscape={false}
+            contentStyle={{ width: 440 }}
+            lockScroll={true}
+          >
+            <div className="addorEditBenTag">
+              <div className="sucessPayment transactionDetails isPopupContainer">
+                <div className="isPopupClose isFlex spacing alignCenter">
+                  <h3>{t("deleteBudget")}</h3>
+                  <span
+                    className="icon icon-new-close-icon Cursor"
+                    onClick={() => setIsDelete(false)}
+                  ></span>
+                </div>
+                <div className="popupBodySpacing">
+                  <div className="beneficiaryTagTxt">
+                    {t("deleteBudgetTxt")}
+                  </div>
+                  <div className="bankDeletionBtns mt-5">
+                    <button
+                      className="createBtn mr-1 newCreateBtn"
+                      onClick={() => setIsDelete(false)}
+                    >
+                      {t("cancel")}
+                    </button>
+                    <button
+                      className={`btn-primary ${false ? "loadBtn" : ""}`}
+                      onClick={async () => {
+                        let response = await endpoint.post(api.deleteBudget, {
+                          _id: categAsideLabels?.id,
+                        });
+                        if (response.data.success === true) {
+                          toast.success(t("budgetDeletedSuccess"));
+                          setIsDelete(false);
+                        } else {
+                          toast.success(t("budgetDeletedUnsuccess"));
+                          setIsDelete(false);
+                        }
+                      }}
+                    >
+                      {t("delete")}
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </Popup>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default AllBudget;
+
+
+
+subComponent of AllBudget
+import React from "react";
+import { useTranslation } from "react-i18next";
+import { millify } from "../../../../utils/roleHelper";
+import BudgetSectionLoader from "./features/BudgetSectionLoader";
+import { grantModuleAccess } from "../../../../utils/roleHelper";
+import * as d3 from "d3";
+
+const IncomeExpense = (props: any) => {
+  const {
+    budgetDashboard,
+    isIncomeActive,
+    setIsIncomeActive,
+    setCategAsideLabels,
+    categAsideLabels,
+    isDownArrow,
+    setIsDownArrow,
+    setCategoryCurrency,
+    setIsExpenseActive,
+    isExpenseActive,
+    setIsCategAside,
+    isCategAside,
+    setIsIncExpGraph,
+    setCategoryCurrentLinearGrphData,
+    setCategoryPreviousLinearGrphData,
+    setCategoryLinearGrphData,
+    showTooltip,
+    setShowTooltip,
+    showTooltip1,
+    setShowTooltip1,
+    toolTipRef,
+    setIsEdit,
+    setIsOpenPopup,
+    formikRef,
+    setIsDelete,
+  } = props;
+  const { t, i18n } = useTranslation();
+  const currencyFormatter = require("currency-formatter");
+
+  const handleCategoryLinearGrphData = (budgetGraph: any, type: any) => {
+    const parseTime = d3.timeParse("%Y/%m/%d");
+    if (type === "income") {
+      const parsedGraphIncomeData = budgetGraph?.map((key: any) => ({
+        balance: key?.balance,
+        date: parseTime(key?.date),
+      }));
+      let current = budgetGraph?.filter(
+        (key: any) => key?.timeline === "current"
+      );
+      let previous = budgetGraph?.filter(
+        (key: any) => key?.timeline === "previous"
+      );
+      current = current?.map((key: any) => ({
+        balance: key?.balance,
+        date: parseTime(key?.date),
+      }));
+      previous = previous?.map((key: any) => ({
+        balance: key?.balance,
+        date: parseTime(key?.date),
+      }));
+      setCategoryCurrentLinearGrphData(current);
+      setCategoryPreviousLinearGrphData(previous);
+      setCategoryLinearGrphData(parsedGraphIncomeData);
+    } else if (type === "expense") {
+      const parsedGraphExpenseData = budgetGraph?.map((key: any) => ({
+        balance: key?.balance,
+        date: parseTime(key?.date),
+      }));
+      let current = budgetGraph?.filter(
+        (key: any) => key?.timeline === "current"
+      );
+      let previous = budgetGraph?.filter(
+        (key: any) => key?.timeline === "previous"
+      );
+      current = current?.map((key: any) => ({
+        balance: key?.balance,
+        date: parseTime(key?.date),
+      }));
+      previous = previous?.map((key: any) => ({
+        balance: key?.balance,
+        date: parseTime(key?.date),
+      }));
+      setCategoryCurrentLinearGrphData(current);
+      setCategoryPreviousLinearGrphData(previous);
+      setCategoryLinearGrphData(parsedGraphExpenseData);
+    }
+    setIsIncExpGraph(false);
+  };
+
+  return (
+    <>
+      {budgetDashboard?.loading ? (
+        <BudgetSectionLoader />
+      ) : (
+        <div className="whiteCard mb-3 incomeSection">
+          <h6 className="isFlex alignCenter borderBottom pb-2">
+            {t("netCredits")}{" "}
+            <span className="pl-1">
+              {budgetDashboard?.data?.income?.currency}{" "}
+              {budgetDashboard?.data?.income?.totalIncomeAmount < 10000
+                ? currencyFormatter.format(
+                    budgetDashboard?.data?.income?.totalIncomeAmount,
+                    { code: "" }
+                  )
+                : millify(
+                    budgetDashboard?.data?.income?.totalIncomeAmount,
+                    true
+                  )}
+            </span>
+            <span className="incomeRec">
+              <em className="icon-up-arrow"></em>
+            </span>
+          </h6>
+          {budgetDashboard?.data?.income?.incomeCategoryData?.map(
+            (key: any) => (
+              <div
+                className={`mt-3 expenseSection ${
+                  isIncomeActive?.[key?.budgetData?.subCategoryId]
+                    ? "isActive"
+                    : ""
+                }`}
+                onClick={() => {
+                  handleCategoryLinearGrphData(
+                    key?.categoryLinearGrphData,
+                    "income"
+                  );
+                  setCategoryCurrency(key?.budgetData?.currency);
+                  setIsIncomeActive({
+                    [key?.budgetData?.subCategoryId]:
+                      !isIncomeActive?.[key?.budgetData?.subCategoryId],
+                  });
+                  setIsExpenseActive({});
+                  setIsCategAside(
+                    isCategAside === key?.budgetData?.subCategoryId
+                      ? null
+                      : key?.budgetData?.subCategoryId
+                  );
+                  setIsIncExpGraph(
+                    isCategAside === key?.budgetData?.subCategoryId
+                      ? true
+                      : false
+                  );
+                  setCategAsideLabels({
+                    id: key?.budgetData?._id,
+                    category: key?.categoryName,
+                    subCategoryName: key?.subCategoryName,
+                    subCategoryNameAR: key?.subCategoryNameAR,
+                    budgetFreqency: key?.budgetData?.frequencyType,
+                    currency: key?.budgetData?.currency,
+                    spendAmount: key?.totalCurrentAmt,
+                    amount: key?.budgetData?.totalBudgetAmt,
+                    description: key?.budgetData?.description,
+                    subCategoryId: key?.budgetData?.subCategoryId,
+                    isIncExpGraph: "income",
+                  });
+                }}
+              >
+                <div className="w-96">
+                  <div className="isFlex alignCenter spacing font-Heavy w-100">
+                    <span className="fs-14">
+                      <span className="accessColor">
+                        {key?.categoryName} :{" "}
+                      </span>
+                      {i18n.language === "en"
+                        ? key?.subCategoryName
+                        : key?.subCategoryNameAR}
+                    </span>
+                    <span className="fs-12 mediumTextColor">
+                      {budgetDashboard?.data?.income?.currency}{" "}
+                      {currencyFormatter.format(key?.totalPreviousAmt, {
+                        code: "",
+                      })}{" "}
+                      Left
+                    </span>
+                  </div>
+                  <div className="isProgressBg">
+                    <div
+                      className={`isProgressStatus ${
+                        key?.isAboveLimit ? "exceededLimit" : ""
+                      }`}
+                      style={{ width: `${key?.percentage}%` }}
+                    ></div>
+                  </div>
+                  <span className="fs-12 font-Heavy">
+                    {key?.totalPreviousAmt === 0 ? (
+                      ""
+                    ) : (
+                      <>
+                        {budgetDashboard?.data?.income?.currency}{" "}
+                        {currencyFormatter.format(key?.totalCurrentAmt, {
+                          code: "",
+                        })}{" "}
+                        of{" "}
+                      </>
+                    )}
+                    <span className="accessColor">
+                      {budgetDashboard?.data?.income?.currency}{" "}
+                      {key?.totalPreviousAmt === 0
+                        ? currencyFormatter.format(
+                            key?.totalPreviousAmt - key?.totalCurrentAmt,
+                            { code: "" }
+                          )
+                        : currencyFormatter.format(
+                            key?.totalPreviousAmt + key?.totalCurrentAmt,
+                            { code: "" }
+                          )}
+                    </span>
+                  </span>
+                </div>
+                <div className="actionSection">
+                  <div
+                    className="icon-dots Cursor"
+                    ref={toolTipRef}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setShowTooltip({
+                        [key?.budgetData?.subCategoryId]:
+                          !showTooltip?.[key?.budgetData?.subCategoryId],
+                      });
+                      setCategAsideLabels({
+                        id: key?.budgetData?._id,
+                        category: key?.categoryName,
+                        subCategoryName: key?.subCategoryName,
+                        subCategoryNameAR: key?.subCategoryNameAR,
+                        budgetFreqency: key?.budgetData?.frequencyType,
+                        currency: key?.budgetData?.currency,
+                        spendAmount: key?.totalCurrentAmt,
+                        amount: key?.budgetData?.totalBudgetAmt,
+                        description: key?.budgetData?.description,
+                        subCategoryId: key?.budgetData?.subCategoryId,
+                      });
+                    }}
+                  ></div>
+                  {showTooltip?.[key?.budgetData?.subCategoryId] && (grantModuleAccess("MOD-299") || grantModuleAccess("MOD-300")) ? (
+                    <div className="transcationTooltip">
+                      <div className="bottom">
+                        <ul>
+                          {grantModuleAccess("MOD-299") ?
+                          <li
+                            onClick={(e: any) => {
+                              e.stopPropagation();
+                              setIsOpenPopup(true);
+                              setIsEdit(true);
+                              setShowTooltip({});
+                              formikRef?.current?.setFieldValue(
+                                `subCategoryId`,
+                                categAsideLabels?.subCategoryId
+                              );
+                              formikRef?.current?.setFieldValue(
+                                `frequencyType`,
+                                categAsideLabels?.budgetFreqency
+                              );
+                              formikRef?.current?.setFieldValue(
+                                `frequencyDate`,
+                                ""
+                              );
+                              formikRef?.current?.setFieldValue(
+                                `amount`,
+                                categAsideLabels?.amount
+                              );
+                              formikRef?.current?.setFieldValue(
+                                `description`,
+                                categAsideLabels?.description
+                              );
+                            }}
+                          >
+                            <span className="icon-New-edit"></span>
+                            {t("edit")}
+                          </li>
+                          : ""}
+                          {grantModuleAccess("MOD-300") ?
+                          <li
+                            onClick={(e: any) => {
+                              e.stopPropagation();
+                              setIsDelete(true);
+                              setShowTooltip({});
+                            }}
+                          >
+                            <span className="icon-fill-delete"></span>
+                            {t("delete")}
+                          </li>
+                          : ""}
+                        </ul>
+                      </div>
+                    </div>
+                  ) : ""}
+                </div>
+              </div>
+            )
+          )}
+        </div>
+      )}
+
+      <div className="whiteCard mb-3 incomeSection">
+        <h6 className="isFlex alignCenter borderBottom pb-2">
+          {t("netDebits")}{" "}
+          <span className="pl-1">
+            {budgetDashboard?.data?.expense?.currency}{" "}
+            {budgetDashboard?.data?.expense?.totalExpenseAmount < 10000
+              ? currencyFormatter.format(
+                  budgetDashboard?.data?.expense?.totalExpenseAmount,
+                  { code: "" }
+                )
+              : millify(
+                  budgetDashboard?.data?.expense?.totalExpenseAmount,
+                  true
+                )}{" "}
+          </span>
+          <span className="incomeRec expenseRec">
+            <em className="icon-up-arrow"></em>
+          </span>
+        </h6>
+        {budgetDashboard?.loading ? (
+          <BudgetSectionLoader />
+        ) : (
+          <>
+            {budgetDashboard?.data?.expense?.expenseCategoryData?.map(
+              (key: any) => (
+                <div
+                  className={`mt-3 expenseSection ${
+                    isExpenseActive?.[key?.budgetData?.subCategoryId]
+                      ? "isActive"
+                      : ""
+                  }`}
+                  onClick={() => {
+                    handleCategoryLinearGrphData(
+                      key?.categoryLinearGrphData,
+                      "expense"
+                    );
+                    setCategoryCurrency(key?.budgetData?.currency);
+                    setIsExpenseActive({
+                      [key?.budgetData?.subCategoryId]:
+                        !isExpenseActive?.[key?.budgetData?.subCategoryId],
+                    });
+                    setIsIncomeActive({});
+                    setIsCategAside(
+                      isCategAside === key?.budgetData?.subCategoryId
+                        ? null
+                        : key?.budgetData?.subCategoryId
+                    );
+                    setIsIncExpGraph(
+                      isCategAside === key?.budgetData?.subCategoryId
+                        ? true
+                        : false
+                    );
+                    setCategAsideLabels({
+                      id: key?.budgetData?._id,
+                      category: key?.categoryName,
+                      subCategoryName: key?.subCategoryName,
+                      subCategoryNameAR: key?.subCategoryNameAR,
+                      budgetFreqency: key?.budgetData?.frequencyType,
+                      currency: key?.budgetData?.currency,
+                      spendAmount: key?.totalCurrentAmt,
+                      amount: key?.budgetData?.totalBudgetAmt,
+                      description: key?.budgetData?.description,
+                      subCategoryId: key?.budgetData?.subCategoryId,
+                      isIncExpGraph: "expense",
+                    });
+                  }}
+                >
+                  <div className="w-96">
+                    <div className="isFlex alignCenter spacing font-Heavy">
+                      <span className="fs-14">
+                        {/* <span className="accessColor">{key?.categoryName} :{" "}</span> */}
+                        {i18n.language === "en"
+                          ? key?.subCategoryName
+                          : key?.subCategoryNameAR}
+                      </span>
+                      <span className="fs-12 mediumTextColor">
+                        {budgetDashboard?.data?.expense?.currency}{" "}
+                        {currencyFormatter.format(key?.totalPreviousAmt, {
+                          code: "",
+                        })}{" "}
+                        Left
+                      </span>
+                    </div>
+                    <div className="isProgressBg">
+                      <div
+                        className={`isProgressStatus ${
+                          key?.isAboveLimit ? "exceededLimit" : ""
+                        }`}
+                        style={{ width: `${key?.percentage}%` }}
+                      ></div>
+                    </div>
+                    <span className="fs-12 font-Heavy">
+                      {key?.totalPreviousAmt === 0 ? (
+                        ""
+                      ) : (
+                        <>
+                          {key?.budgetData?.currency} {key?.totalCurrentAmt} of{" "}
+                        </>
+                      )}
+                      <span className="accessColor">
+                        {budgetDashboard?.data?.expense?.currency}{" "}
+                        {key?.totalPreviousAmt === 0
+                          ? currencyFormatter.format(
+                              key?.totalPreviousAmt - key?.totalCurrentAmt,
+                              { code: "" }
+                            )
+                          : currencyFormatter.format(
+                              key?.totalPreviousAmt + key?.totalCurrentAmt,
+                              { code: "" }
+                            )}
+                      </span>
+                    </span>
+                  </div>
+                  <div className="actionSection">
+                    <div
+                      className="icon-dots Cursor"
+                      ref={toolTipRef}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setShowTooltip1({
+                          [key?.budgetData?.subCategoryId]:
+                            !showTooltip1?.[key?.budgetData?.subCategoryId],
+                        });
+                        setCategAsideLabels({
+                          id: key?.budgetData?._id,
+                          category: key?.categoryName,
+                          subCategoryName: key?.subCategoryName,
+                          subCategoryNameAR: key?.subCategoryNameAR,
+                          budgetFreqency: key?.budgetData?.frequencyType,
+                          currency: key?.budgetData?.currency,
+                          spendAmount: key?.totalCurrentAmt,
+                          amount: key?.budgetData?.totalBudgetAmt,
+                          description: key?.budgetData?.description,
+                          subCategoryId: key?.budgetData?.subCategoryId,
+                        });
+                      }}
+                    ></div>
+                    {showTooltip1?.[key?.budgetData?.subCategoryId] && (grantModuleAccess("MOD-299") || grantModuleAccess("MOD-300")) ? (
+                      <div className="transcationTooltip">
+                        <div className="bottom">
+                          <ul>
+                            {grantModuleAccess("MOD-299") ? 
+                            <li
+                              onClick={(e: any) => {
+                                e.stopPropagation();
+                                setIsOpenPopup(true);
+                                setIsEdit(true);
+                                setShowTooltip1({});
+                                formikRef?.current?.setFieldValue(
+                                  `subCategoryId`,
+                                  categAsideLabels?.subCategoryId
+                                );
+                                formikRef?.current?.setFieldValue(
+                                  `frequencyType`,
+                                  categAsideLabels?.budgetFreqency
+                                );
+                                formikRef?.current?.setFieldValue(
+                                  `frequencyDate`,
+                                  ""
+                                );
+                                formikRef?.current?.setFieldValue(
+                                  `amount`,
+                                  categAsideLabels?.amount
+                                );
+                                formikRef?.current?.setFieldValue(
+                                  `description`,
+                                  categAsideLabels?.description
+                                );
+                              }}
+                            >
+                              <span className="icon-New-edit"></span>
+                              {t("edit")}
+                            </li>
+                             : ""}
+                             {grantModuleAccess("MOD-300") ?
+                            <li
+                              onClick={(e: any) => {
+                                e.stopPropagation();
+                                setIsDelete(true);
+                                setShowTooltip1({});
+                              }}
+                            >
+                              <span className="icon-fill-delete"></span>
+                              {t("delete")}
+                            </li>
+                             : ""}
+                          </ul>
+                        </div>
+                      </div>
+                    ) : ""}
+                  </div>
+                </div>
+              )
+            )}
+          </>
+        )}
+
+        {budgetDashboard?.loading ? (
+          <BudgetSectionLoader />
+        ) : (
+          <div className="mt-4 isOtherExpensesSec">
+            <span className="isFlex alignCenter spacing">
+              <h6>
+                {t("otherExpenses")}
+                <span className="pl-1">
+                  {budgetDashboard?.data?.expense?.currency}{" "}
+                  {budgetDashboard?.data?.expense?.totalOtherExpenseAmount < 10000
+                    ? currencyFormatter.format(
+                        budgetDashboard?.data?.expense?.totalOtherExpenseAmount,
+                        { code: "" }
+                      )
+                    : millify(
+                        budgetDashboard?.data?.expense?.totalOtherExpenseAmount,
+                        true
+                      )}
+                </span>
+              </h6>
+              <i
+                className={`icon-down-arrow downArrow fs-16 ${
+                  isDownArrow ? "toggle" : ""
+                }`}
+                onClick={() => setIsDownArrow(!isDownArrow)}
+              ></i>
+            </span>
+            {isDownArrow && (
+              <>
+                {budgetDashboard?.data?.expense?.otherExpenseCategoryData?.map(
+                  (key: any) => (
+                    <div className="mt-2 borderTop pt-2">
+                      <div className="isFlex alignCenter spacing font-Heavy w-96">
+                        <span className="fs-14">
+                          <span className="accessColor">
+                            {key?.categoryName} :{" "}
+                          </span>
+                          {i18n.language === "en"
+                            ? key?.subCategoryName
+                            : key?.subCategoryNameAR}
+                        </span>
+                        <span className="fs-12 mediumTextColor">
+                          {key?.budgetData?.currency}{" "}
+                          {currencyFormatter.format(key?.totalCurrentAmt, {
+                            code: "",
+                          })}
+                        </span>
+                      </div>
+                    </div>
+                  )
+                )}
+              </>
+            )}
+          </div>
+        )}
+      </div>
+    </>
+  );
+};
+
+export default IncomeExpense;
+
