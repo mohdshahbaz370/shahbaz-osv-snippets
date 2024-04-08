@@ -10,7 +10,7 @@ const App = () => {
   return (
     <>
   {state?.slice(0, limit)?.map((key) => <p key={key}>{key}</p> )}
-  {state.length > limit ?  
+  {state?.length > limit ?  
   <button onClick={() => setLimit(limit + 3)}>Load more...</ button>
   : null}
   </>
@@ -32,7 +32,7 @@ const App = () => {
   return (
     <>
   {state?.slice(0, limit)?.map((key) => <p key={key?.id}>{key?.name}</p> )}
-  {state.length > limit ?  
+  {state?.length > limit ?  
   <button onClick={() => setLimit(limit + 3)}>Load more...</ button>
   : null}
   </>
