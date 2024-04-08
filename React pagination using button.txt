@@ -1,3 +1,5 @@
+// Example 1
+
 import React, { useState } from 'react'
 
 
@@ -8,6 +10,28 @@ const App = () => {
   return (
     <>
   {state?.slice(0, limit)?.map((key) => <p key={key}>{key}</p> )}
+  {state.length > limit ?  
+  <button onClick={() => setLimit(limit + 3)}>Load more...</ button>
+  : null}
+  </>
+  )
+}
+
+
+export default App
+
+// Example 2
+
+import React, { useState } from 'react'
+
+
+const App = () => {
+  const [state, setState] = useState([{id: 1, name: "sam"}, {id: 2, name: "john"}, {id: 3, name: "kennedy"}, {id: 4, name:"potter"}, {id: 5, name: "samuel"}, {id: 6, name: "warner"}, {id: 7, name: "smith"}])
+  const [limit, setLimit] = useState(3)
+
+  return (
+    <>
+  {state?.slice(0, limit)?.map((key) => <p key={key?.id}>{key?.name}</p> )}
   {state.length > limit ?  
   <button onClick={() => setLimit(limit + 3)}>Load more...</ button>
   : null}
