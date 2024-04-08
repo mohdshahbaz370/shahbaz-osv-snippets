@@ -1,0 +1,59 @@
+// Example 1 
+// When clicking on any one element, it will show its content, and the rest of them will collapse.
+// While clicking on the same element multiple times, it will keep showing the same content, and the rest of the elements will remain collapsed.
+
+import React, { useState } from 'react'
+
+
+const App = () => {
+  const [state, setState] = useState([{id: 1, name: "sam"}, {id: 2, name: "john"}, {id: 3, name: "kennedy"}, {id: 4, name:"potter"}])
+  const [viewContentId, setViewContentId] = useState(null);
+
+  const handleViewContentId = (id) => {
+    setViewContentId(id)
+  }
+
+  return (
+    <>
+  {state?.map((key) => <ul>
+    <li key={key?.id} style={{color: "green", marginBottom: "15px", cursor: "pointer"}}onClick={() => handleViewContentId(key?.id) }>{key?.id} click me</li>
+    {viewContentId === key?.id ? <p style={{color: "red", marginBottom: "15px", marginLeft: "10px"}}>My name is {key?.name}</p> : null}
+  </ul> )}
+  </>
+  )
+}
+
+
+export default App
+
+// Example 2
+// When clicking on any one element, it will show its content or expand if it is collapsed, and vice versa, and the rest of the elements state will remain the same whether they are collapsed or expanded.
+// While clicking on the same element multiple times, it will collapse and expand according to the number of times it is clicked, and the rest of the element's state will remain as it is.
+
+
+import React, { useState } from 'react'
+
+
+const App = () => {
+  const [state, setState] = useState([{id: 1, name: "sam"}, {id: 2, name: "john"}, {id: 3, name: "kennedy"}, {id: 4, name:"potter"}])
+  const [viewContentId, setViewContentId] = useState({});
+
+  const handleViewContentId = (id) => {
+    if(viewContentId?.[`${id}`] === id)
+    setViewContentId({...viewContentId, [id]: null})
+    else
+     setViewContentId({...viewContentId, [id]: id})
+  }
+
+  return (
+    <>
+  {state?.map((key) => <ul>
+    <li key={key?.id} style={{color: "green", marginBottom: "15px", cursor: "pointer"}}onClick={() => handleViewContentId(key?.id) }>{key?.id} click me</li>
+    {viewContentId?.[`${key?.id}`] === key?.id ? <p style={{color: "red", marginBottom: "15px", marginLeft: "10px"}}>My name is {key?.name}</p> : null}
+  </ul> )}
+  </>
+  )
+}
+
+
+export default App
