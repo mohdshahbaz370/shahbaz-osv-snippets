@@ -1,0 +1,49 @@
+u can use the reduce() method to achieve this. Here's a simple way to do it:
+
+
+const arr = ['a', 'a', 'b', 'c', 'c', 'c'];
+
+const result = arr.reduce((acc, current) => {
+  acc[current] = (acc[current] || 0) + 1;
+  return acc;
+}, {});
+
+console.log(result); // Output: { a: 2, b: 1, c: 3 }
+
+
+Here's what's happening:
+
+- reduce() iterates over the array.
+- acc is the accumulator object, initialized as an empty object {}.
+- For each element current, it checks if acc already has a property with that key (i.e., the letter). If it does, it increments the value by 1. If not, it sets the value to 1.
+- Finally, it returns the updated acc object.
+
+The resulting object result will have the desired format: { a: 2, b: 1, c: 3 }.
+
+Here's how you can achieve this without using the reduce() method:
+
+
+const arr = ['a', 'a', 'b', 'c', 'c', 'c'];
+const result = {};
+
+for (let i = 0; i < arr.length; i++) {
+  const current = arr[i];
+  if (result[current]) {
+    result[current]++;
+  } else {
+    result[current] = 1;
+  }
+}
+
+console.log(result); // Output: { a: 2, b: 1, c: 3 }
+
+
+Here's what's happening:
+
+- We initialize an empty object result.
+- We loop through the array using a for loop.
+- For each element current, we check if result already has a property with that key (i.e., the letter).
+- If it does, we increment the value by 1. If not, we set the value to 1.
+- Finally, we log the resulting object result.
+
+This approach uses a simple for loop and conditional statements to achieve the same result as the reduce() method.
